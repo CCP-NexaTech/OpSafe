@@ -1,13 +1,20 @@
-import { ObjectId } from 'mongodb'
-import { BaseDocument } from './common';
+import { ObjectId } from 'mongodb';
 
-export type UserStatus = 'active' | 'inactive';
+export type UserRole = 'admin' | 'manager' | 'viewer';
+export type UserStatus = 'pending' | 'active' | 'disabled';
 
-export interface User extends BaseDocument {
+export interface User {
+  _id: ObjectId;
   organizationId: ObjectId;
   email: string;
   name: string;
-  passwordHash: string;
-  role: 'admin' | 'operator';
+  role: UserRole;
   status: UserStatus;
+  passwordHash: string | null;
+  invitationToken: string | null;
+  invitationExpiresAt: Date | null;
+  isDeleted: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+  deletedAt?: Date | null;
 }
