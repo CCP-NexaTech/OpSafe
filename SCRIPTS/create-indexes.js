@@ -17,8 +17,8 @@ dbOpsafe.organizations.createIndex(
   { name: "idx_organizations_name" }
 );
 dbOpsafe.organizations.createIndex(
-  { isDeleted: 1 },
-  { name: "idx_organizations_isDeleted" }
+  { isDeleted: 1, createdAt: -1 },
+  { name: "idx_organizations_isDeleted_createdAt" }
 );
 
 // =============== users ===============
