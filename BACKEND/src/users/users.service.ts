@@ -1,4 +1,10 @@
-import { Inject, Injectable, NotFoundException, ConflictException, BadRequestException } from '@nestjs/common';
+import {
+  Inject,
+  Injectable,
+  NotFoundException,
+  ConflictException,
+  BadRequestException,
+} from '@nestjs/common';
 import { Db, ObjectId } from 'mongodb';
 import * as argon2 from 'argon2';
 import crypto from 'crypto';
@@ -11,8 +17,7 @@ import type { AcceptInviteDto } from './dto/accept-invite.dto';
 import type { UserResponseDto } from './dto/user-response.dto';
 import { USER_INVITATION_QUEUE } from '../notifications/notification.tokens';
 import type { InvitationEmailJob } from '../types/notifications/invitationEmailJob';
-import type { Organization } from '../types/database/organizations';
-
+import type { InviteUserResponseDto } from './dto/invite-user-response.dto';
 
 @Injectable()
 export class UsersService {
@@ -55,7 +60,7 @@ export class UsersService {
   async inviteUser(
     organizationId: string,
     inviteUserDto: InviteUserDto,
-  ): Promise<UserResponseDto & { invitationToken: string }> {
+  ): Promise<InviteUserResponseDto> {
     if (!ObjectId.isValid(organizationId)) {
       throw new BadRequestException('Invalid organization id');
     }
@@ -78,12 +83,16 @@ export class UsersService {
     });
 
     if (existingUser) {
-      throw new ConflictException('User with this email already exists in this organization');
+      throw new ConflictException(
+        'User with this email already exists in this organization',
+      );
     }
 
     const now = new Date();
     const invitationToken = this.generateInvitationToken();
-    const invitationExpiresAt = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
+    const invitationExpiresAt = new Date(
+      now.getTime() + 7 * 24 * 60 * 60 * 1000,
+    );
 
     const userStatus: UserStatus = 'pending';
 
@@ -102,7 +111,9 @@ export class UsersService {
       deletedAt: null,
     };
 
-    const insertResult = await this.usersCollection.insertOne(userToInsert as User);
+    const insertResult = await this.usersCollection.insertOne(
+      userToInsert as User,
+    );
 
     const userDocument: User = {
       _id: insertResult.insertedId,
@@ -110,6 +121,10 @@ export class UsersService {
     };
 
     const organizationName = organizationExists.name;
+
+    const acceptInviteUrl = `https://app.opsafe.com.br/accept-invite?token=${encodeURIComponent(
+      invitationToken,
+    )}`;
 
     await this.userInvitationQueue.add('send-invitation-email', {
       email: userDocument.email,
@@ -120,11 +135,13 @@ export class UsersService {
 
     return {
       ...this.mapToResponse(userDocument),
-      invitationToken,
+      acceptInviteUrl,
     };
   }
 
-  async acceptInvite(acceptInviteDto: AcceptInviteDto): Promise<UserResponseDto> {
+  async acceptInvite(
+    acceptInviteDto: AcceptInviteDto,
+  ): Promise<UserResponseDto> {
     const now = new Date();
 
     const userDocument = await this.usersCollection.findOne({
@@ -136,7 +153,10 @@ export class UsersService {
       throw new NotFoundException('Invitation not found or already used');
     }
 
-    if (!userDocument.invitationExpiresAt || userDocument.invitationExpiresAt < now) {
+    if (
+      !userDocument.invitationExpiresAt ||
+      userDocument.invitationExpiresAt < now
+    ) {
       throw new BadRequestException('Invitation expired');
     }
 
@@ -168,7 +188,9 @@ export class UsersService {
     return this.mapToResponse(result);
   }
 
-  async listUsersByOrganization(organizationId: string): Promise<UserResponseDto[]> {
+  async listUsersByOrganization(
+    organizationId: string,
+  ): Promise<UserResponseDto[]> {
     if (!ObjectId.isValid(organizationId)) {
       throw new BadRequestException('Invalid organization id');
     }

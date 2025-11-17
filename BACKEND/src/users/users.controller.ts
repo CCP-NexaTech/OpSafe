@@ -3,16 +3,17 @@ import { UsersService } from './users.service';
 import { InviteUserDto } from './dto/invite-user.dto';
 import { AcceptInviteDto } from './dto/accept-invite.dto';
 import type { UserResponseDto } from './dto/user-response.dto';
+import type { InviteUserResponseDto } from './dto/invite-user-response.dto';
 
 @Controller()
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
-  @Post('organizations/:organizationId/users/invite')
+  @Post('/organizations/:organizationId/users/invite')
   async inviteUser(
     @Param('organizationId') organizationId: string,
     @Body() inviteUserDto: InviteUserDto,
-  ): Promise<UserResponseDto & { invitationToken: string }> {
+  ): Promise<InviteUserResponseDto> {
     return this.usersService.inviteUser(organizationId, inviteUserDto);
   }
 
