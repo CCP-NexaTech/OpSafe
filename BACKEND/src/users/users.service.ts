@@ -1,12 +1,18 @@
 import { Inject, Injectable, NotFoundException, ConflictException, BadRequestException } from '@nestjs/common';
 import { Db, ObjectId } from 'mongodb';
 import * as argon2 from 'argon2';
+import crypto from 'crypto';
+import { Queue } from 'bullmq';
 
 import { DATABASE_CONNECTION } from '../database/database.module';
 import type { User, UserStatus } from '../types/database/users';
 import type { InviteUserDto } from './dto/invite-user.dto';
 import type { AcceptInviteDto } from './dto/accept-invite.dto';
 import type { UserResponseDto } from './dto/user-response.dto';
+import { USER_INVITATION_QUEUE } from '../notifications/notification.tokens';
+import type { InvitationEmailJob } from '../types/notifications/invitationEmailJob';
+import type { Organization } from '../types/database/organizations';
+
 
 @Injectable()
 export class UsersService {
@@ -16,6 +22,8 @@ export class UsersService {
   constructor(
     @Inject(DATABASE_CONNECTION)
     private readonly database: Db,
+    @Inject(USER_INVITATION_QUEUE)
+    private readonly userInvitationQueue: Queue<InvitationEmailJob>,
   ) {}
 
   private get usersCollection() {
@@ -100,6 +108,15 @@ export class UsersService {
       _id: insertResult.insertedId,
       ...userToInsert,
     };
+
+    const organizationName = organizationExists.name;
+
+    await this.userInvitationQueue.add('send-invitation-email', {
+      email: userDocument.email,
+      name: userDocument.name,
+      organizationName,
+      invitationToken,
+    });
 
     return {
       ...this.mapToResponse(userDocument),
