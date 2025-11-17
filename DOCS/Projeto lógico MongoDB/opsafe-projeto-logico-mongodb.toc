@@ -1,0 +1,25 @@
+\babel@toc {brazil}{}\relax 
+\contentsline {section}{\numberline {1}Introdução}{2}{}%
+\contentsline {section}{\numberline {2}Estrutura Geral do Cluster}{2}{}%
+\contentsline {subsection}{\numberline {2.1}Cluster e Databases}{2}{}%
+\contentsline {subsection}{\numberline {2.2}Lista de Coleções}{2}{}%
+\contentsline {section}{\numberline {3}Padrões de Modelagem}{3}{}%
+\contentsline {subsection}{\numberline {3.1}Multi-tenant por organizationId}{3}{}%
+\contentsline {subsection}{\numberline {3.2}Auditoria e Soft Delete}{3}{}%
+\contentsline {subsection}{\numberline {3.3}Classificação de Dados (LGPD)}{4}{}%
+\contentsline {section}{\numberline {4}Índices Padrão por Coleção}{4}{}%
+\contentsline {subsection}{\numberline {4.1}organizations}{4}{}%
+\contentsline {subsection}{\numberline {4.2}users}{4}{}%
+\contentsline {subsection}{\numberline {4.3}operators}{4}{}%
+\contentsline {subsection}{\numberline {4.4}clients}{5}{}%
+\contentsline {subsection}{\numberline {4.5}contracts}{5}{}%
+\contentsline {subsection}{\numberline {4.6}posts}{5}{}%
+\contentsline {subsection}{\numberline {4.7}equipmentTypes}{5}{}%
+\contentsline {subsection}{\numberline {4.8}equipments}{5}{}%
+\contentsline {subsection}{\numberline {4.9}assignments}{5}{}%
+\contentsline {subsection}{\numberline {4.10}terms}{6}{}%
+\contentsline {subsection}{\numberline {4.11}maintenanceOrders}{6}{}%
+\contentsline {subsection}{\numberline {4.12}alerts}{6}{}%
+\contentsline {subsection}{\numberline {4.13}auditLogs}{6}{}%
+\contentsline {subsection}{\numberline {4.14}customFields}{6}{}%
+\contentsline {section}{\numberline {5}Diretrizes de Uso no Backend}{6}{}%

@@ -1,0 +1,208 @@
+\documentclass[12pt,a4paper]{article}
+
+% Pacotes básicos
+\usepackage[utf8]{inputenc}
+\usepackage[brazil]{babel}
+\usepackage{geometry}
+\usepackage{setspace}
+\usepackage{titlesec}
+\usepackage{hyperref}
+\usepackage{lipsum}
+
+% Margens
+\geometry{
+  left=2.5cm,
+  right=2.5cm,
+  top=2.5cm,
+  bottom=2.5cm
+}
+
+% Espaçamento
+\onehalfspacing
+
+% Aparência dos títulos
+\titleformat{\section}{\bfseries\large}{\thesection}{1em}{}
+\titleformat{\subsection}{\bfseries\normalsize}{\thesubsection}{1em}{}
+
+% Informações do documento
+\title{\textbf{Documento de Iniciação do Projeto \\ \vspace{0.3cm}
+OpSafe – Plataforma de Gestão de Equipamentos Operacionais para Empresas de Segurança Privada}}
+\author{Caio César Ponte}
+\date{15 de novembro de 2025}
+
+\begin{document}
+
+\maketitle
+\thispagestyle{empty}
+
+\newpage
+
+\section*{Resumo Executivo}
+
+O presente documento descreve a concepção inicial do projeto \textbf{OpSafe}, uma plataforma SaaS voltada para empresas de segurança privada, destinada à gestão completa do ciclo de vida de equipamentos operacionais tais como EPIs, rádios comunicadores, viaturas, dispositivos eletrônicos e demais itens essenciais à operação de vigilância.
+
+O projeto parte da necessidade crescente de profissionalização, compliance e rastreabilidade no setor, impulsionada pela nova Lei nº 14.967/2024, que institui o Estatuto da Segurança Privada e da Segurança das Instituições Financeiras. O objetivo é criar uma solução clara, simples e orientada para resultados, permitindo que empresas reduzam perdas, aumentem eficiência e facilitem processos de auditoria.
+
+\newpage
+
+\section{Contexto de Mercado}
+
+O setor de segurança privada é um dos maiores do país em número de trabalhadores e volume de contratos, com quase cinco mil empresas autorizadas a operar pela Polícia Federal. Essas empresas atuam em áreas como vigilância patrimonial, monitoramento eletrônico, segurança de eventos, segurança em instituições financeiras, escolta armada e transporte de valores.
+
+Frente ao aumento da demanda e da complexidade operacional, cresce também a necessidade de controle rigoroso de equipamentos de uso contínuo, sob risco financeiro, trabalhista e regulatório.
+
+Custos como extravio, danos não documentados, EPIs vencidos, manutenção irregular de viaturas e ausência de inventário atualizado prejudicam a operação e reduzirem competitividade.
+
+\section{Contexto Regulatório Atualizado}
+
+A regulação do setor de segurança privada no Brasil passou por uma transformação significativa com a publicação da \textbf{Lei nº 14.967/2024}, sancionada em 9 de setembro de 2024, que revogou integralmente a antiga Lei nº 7.102/1983. A nova lei moderniza e organiza o setor, trazendo definições mais claras sobre tipos de serviços, requisitos de funcionamento e responsabilidades das empresas.
+
+Entre os pontos mais relevantes para este projeto, destacam-se:
+
+\begin{itemize}
+    \item A prestação de serviços de segurança privada depende de autorização prévia da Polícia Federal.
+    \item A lei define serviços como vigilância patrimonial, segurança eletrônica, escolta armada, segurança de eventos e transporte de valores.
+    \item Estabelece capital social mínimo para funcionamento de cada categoria de serviço.
+    \item Exige comprovação de garantias financeiras e capacidade operacional.
+    \item Reforça a necessidade de registro e controle de equipamentos e pessoal, incluindo obrigações de prestação de contas e compliance.
+    \item Prevê revisões periódicas de critérios e valores por regulamento futuro da Polícia Federal.
+\end{itemize}
+
+Tais fatores regulatórios reforçam a necessidade de ferramentas que auxiliem empresas a comprovar conformidade e manter controles transparentes e atualizados.
+
+\section{Problema Central}
+
+Empresas de segurança privada enfrentam desafios recorrentes na gestão de equipamentos operacionais. Os principais problemas identificados são:
+
+\begin{itemize}
+    \item Controle manual e descentralizado de equipamentos essenciais.
+    \item Dificuldade em saber quem está com qual item durante os turnos.
+    \item Falta de rastreabilidade histórica por colaborador, posto ou contrato.
+    \item Manutenções preventivas inexistentes ou mal registradas.
+    \item EPIs vencidos, especialmente coletes balísticos, sem alertas ou controle.
+    \item Inventários demorados e sujeitos a erro humano.
+    \item Ausência de relatórios estruturados para auditorias e renovações junto à Polícia Federal.
+\end{itemize}
+
+A soma desses pontos gera impacto financeiro, operacional e regulatório, criando terreno adequado para o surgimento de uma solução especializada.
+
+\section{Objetivos do Projeto}
+
+\subsection{Objetivo Geral}
+Desenvolver uma plataforma SaaS simples, robusta e eficiente para controle integral do ciclo de vida de equipamentos em empresas de segurança privada, com foco em rastreabilidade, conformidade regulatória e otimização operacional.
+
+\subsection{Objetivos Específicos}
+
+\begin{enumerate}
+    \item Reduzir perdas e extravios de equipamentos.
+    \item Aumentar o controle e a rastreabilidade de itens em uso.
+    \item Diminuir tempo gasto com inventários e planilhas manuais.
+    \item Fornecer relatórios claros para processos de auditoria da Polícia Federal e contratos privados.
+    \item Criar base de dados confiável para manutenção preventiva de ativos.
+\end{enumerate}
+
+\section{Escopo Inicial – MVP}
+
+O MVP inicial da plataforma OpSafe deverá contemplar:
+
+\begin{itemize}
+    \item Cadastro de equipamentos com identificador único.
+    \item Cadastro de colaboradores, postos e clientes.
+    \item Registro de entrega e devolução por meio de \textbf{Termo Digital}.
+    \item Painel de visão rápida indicando quem está com qual equipamento.
+    \item Controle de validade de EPIs e alertas para substituição.
+    \item Controle de manutenção de viaturas e rádios.
+    \item Relatórios básicos em PDF e Excel.
+\end{itemize}
+
+\section{Personas}
+
+\subsection{Supervisor Operacional}
+Responsável pela gestão de equipes em campo, acompanhando turnos e postos. Precisa de rapidez e clareza na identificação da situação de cada equipamento.
+
+\subsection{Gestor de Equipamentos / Frota}
+Cuida de ativos caros e críticos, como viaturas e rádios. Depende de histórico detalhado para justificar custos e garantir continuidade operacional.
+
+\subsection{Diretor / Proprietário}
+Busca estabilidade regulatória, redução de custos e visibilidade real da operação. Enxerga a plataforma como ferramenta de gestão e compliance.
+
+\section{Regras de Negócio}
+
+\subsection{Identificação única de cada equipamento}
+Cada item é registrado com identificador único, permitindo rastreabilidade histórica.
+
+\subsection{Termo Digital obrigatório para entrega e devolução}
+Operações de entrega e devolução devem gerar registro digital com data, responsável e validade.
+
+\subsection{EPIs com validade vencida não podem ser alocados}
+A plataforma bloqueia automaticamente a entrega de EPIs vencidos, em alinhamento a boas práticas de segurança do trabalho.
+
+\subsection{Manutenções obrigam abertura de ordem registrada}
+Toda manutenção preventiva ou corretiva deve ser registrada e vinculada ao ativo.
+
+\subsection{Regras específicas por contrato}
+Cada contrato de prestação de serviços pode definir equipamentos mínimos e exigências próprias.
+
+\section{Arquitetura de Módulos – Visão Funcional}
+
+\subsection{Cadastro}
+Equipamentos, colaboradores, clientes, categorias e tipos.
+
+\subsection{Operação}
+Entrega e devolução, painel de uso, turnos e alertas.
+
+\subsection{Manutenção}
+Ordens de manutenção, custos, prazos, retorno de itens.
+
+\subsection{Relatórios}
+Inventário, extravios, conformidade contratual, manutenção e validade de EPIs.
+
+\section{Fluxos Essenciais}
+
+\subsection{Fluxo de Cadastro de Novo Equipamento}
+Informações básicas, estado inicial como ``Disponível'' e capacidade de rastreio imediato.
+
+\subsection{Fluxo de Entrega ao Colaborador}
+Seleção do item, verificação automática de validade e emissão do Termo Digital.
+
+\subsection{Fluxo de Devolução}
+Registro de retorno do item, mudança de estado e abertura de manutenção quando necessário.
+
+\section{Métricas de Sucesso}
+
+\begin{itemize}
+    \item Redução da taxa de extravio por colaborador.
+    \item Redução do tempo médio de inventário mensal.
+    \item Aumento da taxa de EPIs válidos.
+    \item Quantidade de manutenções preventivas realizadas dentro do prazo.
+\end{itemize}
+
+\section{Premissas e Riscos}
+
+\subsection{Premissas}
+As empresas médias do setor estão dispostas a adotar ferramentas simples e de implantação rápida.
+
+\subsection{Riscos}
+Resistência cultural ao uso de sistemas por supervisores de campo; ausência de integrações pode limitar valor inicial.
+
+\section{Roadmap Macro}
+
+\subsection{Fase 0 – Validação}
+Entrevistas com empresas do Nordeste para confirmar hipóteses e ajustar diretrizes.
+
+\subsection{Fase 1 – MVP}
+Construção do núcleo do sistema e implantação em empresa piloto.
+
+\subsection{Fase 2 – Consolidação}
+Aprimoramento da experiência e introdução de novos módulos.
+
+\subsection{Fase 3 – Expansão Regional}
+Escalonamento para múltiplas empresas de médio porte.
+
+\section*{Conclusão}
+
+O projeto OpSafe nasce com o objetivo de modernizar a gestão de equipamentos operacionais no setor de segurança privada, alinhado às exigências regulatórias mais recentes e às necessidades reais de eficiência e controle das empresas.
+
+Este documento serve como marco inicial estruturado para desenvolvimento, validação e expansão futura do produto.
+
+\end{document}

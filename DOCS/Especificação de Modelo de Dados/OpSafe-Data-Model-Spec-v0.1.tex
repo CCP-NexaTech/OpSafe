@@ -1,0 +1,448 @@
+\documentclass[12pt,a4paper]{article}
+
+% ---- Packages ----
+\usepackage[utf8]{inputenc}
+\usepackage[brazil]{babel}
+\usepackage{geometry}
+\usepackage{setspace}
+\usepackage{titlesec}
+\usepackage{hyperref}
+\usepackage{longtable}
+\usepackage{array}
+
+% ---- Page setup ----
+\geometry{margin=2.5cm}
+\setstretch{1.25}
+
+% ---- Title format ----
+\titleformat{\section}{\large\bfseries}{\thesection}{1em}{}
+\titleformat{\subsection}{\normalsize\bfseries}{\thesubsection}{1em}{}
+
+\begin{document}
+
+% ================== CAPA ==================
+\begin{titlepage}
+    \centering
+    {\Huge \textbf{OpSafe -- Data Model Specification}}\\[1.5cm]
+    {\Large \textbf{Versão v0.1}}\\[0.5cm]
+    {\large Documento Técnico Empresarial}\\[1cm]
+    {\large Caio César Ponte}\\[0.3cm]
+    {\large \textbf{Data: 15 de novembro de 2025}}\\[4cm]
+
+    \vfill
+    {\small Este documento descreve o modelo de dados inicial da plataforma OpSafe, incluindo estruturas, padrões de auditoria, regras de negócio, requisitos de segurança e aderência à LGPD.}
+\end{titlepage}
+
+\tableofcontents
+\newpage
+
+% ================== 1. OBJETIVO ==================
+\section{Objetivo do Documento}
+
+Este documento define o \textbf{Modelo de Dados v0.1} do projeto OpSafe, cobrindo:
+
+\begin{itemize}
+    \item Estruturas de coleções (NoSQL) e seus campos;
+    \item Regras e relacionamentos principais;
+    \item Padrões globais de auditoria e soft delete;
+    \item Marcação conceitual de dados pessoais (LGPD);
+    \item Base para especificações de API, testes e migrações futuras.
+\end{itemize}
+
+Serve como referência única para desenvolvedores, arquitetos, QA e ferramentas de IA que darão suporte ao projeto.
+
+% ================== 2. PRINCÍPIOS ==================
+\section{Princípios Gerais}
+
+\subsection{Multi-tenant}
+
+\begin{itemize}
+    \item Todas as coleções de negócio incluem \texttt{organizationId}.
+    \item Cada \texttt{organization} representa uma empresa cliente distinta.
+    \item Não há compartilhamento lógico de dados entre organizações diferentes.
+\end{itemize}
+
+\subsection{Modelo NoSQL}
+
+\begin{itemize}
+    \item Banco orientado a documentos (MongoDB, Firestore ou equivalente).
+    \item Relacionamentos expressos por IDs (\texttt{equipmentId}, \texttt{operatorId}, etc.).
+    \item Preferência por documentos auto-contidos para consultas mais comuns.
+\end{itemize}
+
+\subsection{Convenções de Tipos}
+
+\begin{itemize}
+    \item \textbf{string} -- texto ou identificadores.
+    \item \textbf{number} -- valores numéricos.
+    \item \textbf{boolean} -- verdadeiro/falso.
+    \item \textbf{datetime} -- data/hora em UTC, formato ISO 8601.
+    \item \textbf{enum} -- conjunto finito de valores válidos.
+    \item \textbf{object} -- subdocumento com campos próprios.
+    \item \textbf{array<T>} -- lista de elementos do tipo \texttt{T}.
+\end{itemize}
+
+\subsection{Padrão de Auditoria e Soft Delete}
+
+Todas as coleções de negócio devem conter os campos:
+
+\begin{longtable}{|p{4cm}|p{3cm}|p{7cm}|}
+\hline
+\textbf{Campo} & \textbf{Tipo} & \textbf{Descrição}\\ \hline
+createdAt & datetime & Data/hora de criação do documento \\ \hline
+createdByUserId & string/null & ID do usuário que criou (ou null se sistema) \\ \hline
+updatedAt & datetime/null & Data/hora da última atualização \\ \hline
+updatedByUserId & string/null & ID do usuário que atualizou por último \\ \hline
+deletedAt & datetime/null & Data/hora de exclusão lógica (soft delete) \\ \hline
+deletedByUserId & string/null & ID do usuário que executou o soft delete \\ \hline
+isDeleted & boolean & Indicador de exclusão lógica (padrão: false) \\ \hline
+\end{longtable}
+
+Regra padrão:
+
+\begin{itemize}
+    \item Se \texttt{isDeleted = true}, então \texttt{deletedAt} não pode ser nulo.
+    \item Consultas operacionais devem considerar apenas registros com \texttt{isDeleted = false}, salvo quando explicitamente indicado o contrário.
+\end{itemize}
+
+\subsection{LGPD -- Classificação Conceitual}
+
+Internamente, os campos são classificados em:
+
+\begin{itemize}
+    \item \textbf{PII}: dado pessoal identificável (nome, e-mail, IP, etc.);
+    \item \textbf{Sensitive}: dado pessoal sensível (por exemplo, CPF, se armazenado);
+    \item \textbf{Business}: dados puramente de negócio (status de equipamento, ID de contrato, etc.).
+\end{itemize}
+
+Esta classificação orienta decisões de:
+
+\begin{itemize}
+    \item Minimização de coleta;
+    \item Anonimização de dados;
+    \item Políticas de retenção;
+    \item Resposta a solicitações de titulares (LGPD).
+\end{itemize}
+
+% ================== 3. LISTA DE COLEÇÕES ==================
+\section{Lista de Coleções do Modelo v0.1}
+
+\begin{enumerate}
+    \item organizations
+    \item users
+    \item operators
+    \item clients
+    \item contracts
+    \item posts
+    \item equipmentTypes
+    \item equipments
+    \item assignments
+    \item terms
+    \item maintenanceOrders
+    \item alerts
+    \item auditLogs
+    \item customFields (opcional / extensível)
+\end{enumerate}
+
+% ================== 4. ESPECIFICAÇÕES ==================
+\section{Especificações de Coleções}
+
+% -------- 4.1 organizations --------
+\subsection{organizations}
+
+Representa empresas que utilizam o OpSafe (tenant raiz).
+
+\begin{longtable}{|p{4cm}|p{3cm}|p{7cm}|}
+\hline
+\textbf{Campo} & \textbf{Tipo} & \textbf{Descrição} \\ \hline
+id & string & Identificador único da organização \\ \hline
+name & string & Nome da organização (razão social ou fantasia) \\ \hline
+cnpj & string/null & CNPJ da empresa (Business) \\ \hline
+contactEmail & string/null & E-mail geral de contato (PII de contato) \\ \hline
+contactPhone & string/null & Telefone geral de contato (PII de contato) \\ \hline
+status & enum & \texttt{"active"}, \texttt{"suspended"}, \texttt{"trial"} \\ \hline
+createdAt, createdByUserId, updatedAt, updatedByUserId, deletedAt, deletedByUserId, isDeleted & vários & Campos de auditoria e soft delete \\ \hline
+\end{longtable}
+
+% -------- 4.2 users --------
+\subsection{users}
+
+Usuários internos do sistema (admin, gestor, supervisor, etc.).
+
+\begin{longtable}{|p{4cm}|p{3cm}|p{7cm}|}
+\hline
+id & string & ID único do usuário \\ \hline
+organizationId & string & Organização à qual o usuário pertence \\ \hline
+name & string & Nome completo do usuário (PII) \\ \hline
+email & string & E-mail de login, único por organização (PII) \\ \hline
+role & enum & \texttt{"admin"}, \texttt{"manager"}, \texttt{"supervisor"}, \texttt{"viewer"} \\ \hline
+passwordHash & string & Hash seguro da senha (Sensitive, ex.: Argon2) \\ \hline
+status & enum & \texttt{"active"}, \texttt{"inactive"} \\ \hline
+lastLoginAt & datetime/null & Data/hora do último login \\ \hline
+createdAt, createdByUserId, updatedAt, updatedByUserId, deletedAt, deletedByUserId, isDeleted & vários & Auditoria e soft delete \\ \hline
+\end{longtable}
+
+% -------- 4.3 operators --------
+\subsection{operators}
+
+Operadores que recebem e utilizam equipamentos (vigilantes, motoristas etc.). Podem não ter acesso direto ao sistema.
+
+\begin{longtable}{|p{4cm}|p{3cm}|p{7cm}|}
+\hline
+id & string & ID único do operador \\ \hline
+organizationId & string & Organização associada \\ \hline
+fullName & string & Nome completo (PII) \\ \hline
+identifierCode & string & Código interno / matrícula (PII/Business) \\ \hline
+cpf & string/null & CPF (PII sensível, apenas se estritamente necessário) \\ \hline
+role & string & Função (ex.: vigilante, motorista) \\ \hline
+status & enum & \texttt{"active"}, \texttt{"inactive"} \\ \hline
+contactPhone & string/null & Telefone (PII) \\ \hline
+notes & string/null & Observações gerais de negócio \\ \hline
+createdAt, createdByUserId, updatedAt, updatedByUserId, deletedAt, deletedByUserId, isDeleted & vários & Auditoria e soft delete \\ \hline
+\end{longtable}
+
+% -------- 4.4 clients --------
+\subsection{clients}
+
+Clientes finais atendidos pela organização de segurança (condomínios, empresas, indústrias).
+
+\begin{longtable}{|p{4cm}|p{3cm}|p{7cm}|}
+\hline
+id & string & ID único do cliente \\ \hline
+organizationId & string & Organização dona deste cliente \\ \hline
+name & string & Nome do cliente \\ \hline
+cnpj & string/null & CNPJ do cliente \\ \hline
+contactName & string/null & Nome do representante (PII) \\ \hline
+contactEmail & string/null & E-mail do representante (PII) \\ \hline
+contactPhone & string/null & Telefone do representante (PII) \\ \hline
+address & object/null & Endereço: rua, cidade, estado, CEP \\ \hline
+createdAt, createdByUserId, updatedAt, updatedByUserId, deletedAt, deletedByUserId, isDeleted & vários & Auditoria e soft delete \\ \hline
+\end{longtable}
+
+% -------- 4.5 contracts --------
+\subsection{contracts}
+
+Contratos de prestação de serviços com regras mínimas de equipamentos.
+
+\begin{longtable}{|p{4cm}|p{3cm}|p{7cm}|}
+\hline
+id & string & ID único do contrato \\ \hline
+organizationId & string & Organização dona do contrato \\ \hline
+clientId & string & Referência ao cliente \\ \hline
+code & string & Código interno do contrato \\ \hline
+description & string & Descrição resumida \\ \hline
+startDate & datetime & Data de início \\ \hline
+endDate & datetime/null & Data de término (se houver) \\ \hline
+status & enum & \texttt{"draft"}, \texttt{"active"}, \texttt{"terminated"} \\ \hline
+minEquipmentRules & array<object> & Regras mínimas por posto/tipo de equipamento \\ \hline
+\multicolumn{3}{|p{14cm}|}{
+\textbf{Estrutura de minEquipmentRules:}
+\begin{itemize}
+    \item postId: string/null
+    \item equipmentTypeId: string
+    \item quantityMin: number
+\end{itemize}
+} \\ \hline
+createdAt, createdByUserId, updatedAt, updatedByUserId, deletedAt, deletedByUserId, isDeleted & vários & Auditoria e soft delete \\ \hline
+\end{longtable}
+
+% -------- 4.6 posts --------
+\subsection{posts}
+
+Postos de serviço onde há operadores e equipamentos alocados.
+
+\begin{longtable}{|p{4cm}|p{3cm}|p{7cm}|}
+\hline
+id & string & ID do posto \\ \hline
+organizationId & string & Organização dona do posto \\ \hline
+clientId & string & Cliente associado \\ \hline
+name & string & Nome do posto (ex.: Portaria Principal) \\ \hline
+location & string/null & Descrição livre da localização \\ \hline
+contractId & string/null & Contrato vinculado \\ \hline
+status & enum & \texttt{"active"}, \texttt{"inactive"} \\ \hline
+createdAt, createdByUserId, updatedAt, updatedByUserId, deletedAt, deletedByUserId, isDeleted & vários & Auditoria e soft delete \\ \hline
+\end{longtable}
+
+% -------- 4.7 equipmentTypes --------
+\subsection{equipmentTypes}
+
+Tipos de equipamentos, com características gerais de cada categoria.
+
+\begin{longtable}{|p{4cm}|p{3cm}|p{7cm}|}
+\hline
+id & string & ID do tipo de equipamento \\ \hline
+organizationId & string & Organização dona \\ \hline
+name & string & Nome do tipo (Rádio, Colete Nível IIIA, etc.) \\ \hline
+category & enum & \texttt{"EPI"}, \texttt{"COMMUNICATION"}, \texttt{"VEHICLE"}, \texttt{"ELECTRONIC"}, \texttt{"OTHER"} \\ \hline
+requiresValidity & boolean & Se exige data de validade (EPIs) \\ \hline
+requiresMaintenance & boolean & Se exige controle de manutenção \\ \hline
+defaultValidityMonths & number/null & Prazo padrão de validade em meses \\ \hline
+defaultMaintenanceIntervalKm & number/null & Intervalo padrão por quilometragem (veículos) \\ \hline
+defaultMaintenanceIntervalDays & number/null & Intervalo padrão em dias \\ \hline
+regulatoryTag & string/null & Referência a norma/regulamento interno \\ \hline
+createdAt, createdByUserId, updatedAt, updatedByUserId, deletedAt, deletedByUserId, isDeleted & vários & Auditoria e soft delete \\ \hline
+\end{longtable}
+
+% -------- 4.8 equipments --------
+\subsection{equipments}
+
+Equipamentos individuais rastreáveis (cada rádio, colete, viatura).
+
+\begin{longtable}{|p{4cm}|p{3cm}|p{7cm}|}
+\hline
+id & string & ID único do equipamento \\ \hline
+organizationId & string & Organização dona \\ \hline
+equipmentTypeId & string & Referência ao tipo de equipamento \\ \hline
+serialNumber & string/null & Número de série do fabricante \\ \hline
+assetTag & string & Etiqueta patrimonial interna (obrigatória) \\ \hline
+status & enum & \texttt{"available"}, \texttt{"in\_use"}, \texttt{"in\_maintenance"}, \texttt{"decommissioned"}, \texttt{"lost"} \\ \hline
+currentLocation & object & Localização atual lógica \\ \hline
+\multicolumn{3}{|p{14cm}|}{
+\textbf{Estrutura de currentLocation:}
+\begin{itemize}
+\item type: \texttt{"stock"}, \texttt{"post"}, \texttt{"operator"}, \texttt{"maintenanceProvider"}
+\item refId: string/null
+\end{itemize}
+} \\ \hline
+purchaseDate & datetime/null & Data de aquisição \\ \hline
+warrantyExpiresAt & datetime/null & Fim de garantia \\ \hline
+validUntil & datetime/null & Validade (EPIs) \\ \hline
+contractId & string/null & Contrato dedicado (se aplicável) \\ \hline
+notes & string/null & Observações \\ \hline
+createdAt, createdByUserId, updatedAt, updatedByUserId, deletedAt, deletedByUserId, isDeleted & vários & Auditoria e soft delete \\ \hline
+\end{longtable}
+
+% -------- 4.9 assignments --------
+\subsection{assignments}
+
+Registros de movimentação de equipamentos (entrega, devolução, transferência).
+
+\begin{longtable}{|p{4cm}|p{3cm}|p{7cm}|}
+\hline
+id & string & ID do registro de movimentação \\ \hline
+organizationId & string & Organização dona \\ \hline
+equipmentId & string & ID do equipamento envolvido \\ \hline
+type & enum & \texttt{"checkout"}, \texttt{"checkin"}, \texttt{"transfer"} \\ \hline
+fromLocation & object/null & Local anterior (pode ser null em checkout inicial) \\ \hline
+toLocation & object & Local de destino \\ \hline
+\multicolumn{3}{|p{14cm}|}{
+\textbf{Estrutura básica de localização:}
+\begin{itemize}
+\item type: string
+\item refId: string/null
+\end{itemize}
+} \\ \hline
+operatorId & string/null & Operador específico (quando aplicável) \\ \hline
+postId & string/null & Posto associado \\ \hline
+termId & string/null & Termo digital vinculado \\ \hline
+conditionBefore & enum/null & \texttt{"new"}, \texttt{"good"}, \texttt{"worn"}, \texttt{"damaged"} \\ \hline
+conditionAfter & enum/null & Estado após devolução \\ \hline
+notes & string/null & Observações \\ \hline
+createdByUserId & string & Usuário que registrou \\ \hline
+createdAt, updatedAt, updatedByUserId, deletedAt, deletedByUserId, isDeleted & vários & Auditoria e soft delete \\ \hline
+\end{longtable}
+
+% -------- 4.10 terms --------
+\subsection{terms}
+
+Termos digitais de responsabilidade relacionados a entregas e uso de equipamentos.
+
+\begin{longtable}{|p{4cm}|p{3cm}|p{7cm}|}
+\hline
+id & string & ID do termo \\ \hline
+organizationId & string & Organização dona \\ \hline
+operatorId & string & Operador signatário \\ \hline
+assignmentIds & array<string> & Lista de IDs de assignments cobertos \\ \hline
+signedAt & datetime & Data/hora de assinatura \\ \hline
+signedBy & string & Nome do operador no momento da assinatura (PII) \\ \hline
+signatureMethod & enum & \texttt{"in\_app"}, \texttt{"tablet"}, \texttt{"external"} \\ \hline
+ipAddress & string/null & IP do dispositivo (PII) \\ \hline
+userAgent & string/null & User agent do dispositivo (PII) \\ \hline
+pdfUrl & string/null & URL do PDF do termo \\ \hline
+blockchainHash & string/null & Hash de integridade, se usado \\ \hline
+createdAt, createdByUserId, updatedAt, updatedByUserId, deletedAt, deletedByUserId, isDeleted & vários & Auditoria e soft delete \\ \hline
+\end{longtable}
+
+% -------- 4.11 maintenanceOrders --------
+\subsection{maintenanceOrders}
+
+Ordens de manutenção preventiva ou corretiva dos equipamentos.
+
+\begin{longtable}{|p{4cm}|p{3cm}|p{7cm}|}
+\hline
+id & string & ID da manutenção \\ \hline
+organizationId & string & Organização dona \\ \hline
+equipmentId & string & Equipamento associado \\ \hline
+type & enum & \texttt{"preventive"}, \texttt{"corrective"} \\ \hline
+status & enum & \texttt{"open"}, \texttt{"in\_progress"}, \texttt{"closed"}, \texttt{"cancelled"} \\ \hline
+openedAt & datetime & Data de abertura \\ \hline
+closedAt & datetime/null & Data de fechamento \\ \hline
+openedByUserId & string & Usuário que abriu a ordem \\ \hline
+providerName & string/null & Nome do prestador de serviço \\ \hline
+cost & number/null & Custo da manutenção \\ \hline
+description & string/null & Descrição detalhada \\ \hline
+nextDueAt & datetime/null & Próxima manutenção programada \\ \hline
+createdAt, createdByUserId, updatedAt, updatedByUserId, deletedAt, deletedByUserId, isDeleted & vários & Auditoria e soft delete \\ \hline
+\end{longtable}
+
+% -------- 4.12 alerts --------
+\subsection{alerts}
+
+Alertas automáticos do sistema (EPI vencendo, atraso de devolução, etc.).
+
+\begin{longtable}{|p{4cm}|p{3cm}|p{7cm}|}
+\hline
+id & string & ID do alerta \\ \hline
+organizationId & string & Organização dona \\ \hline
+type & enum & \texttt{"epi\_expiry"}, \texttt{"late\_return"}, \texttt{"maintenance\_due"}, \texttt{"stock\_low"} \\ \hline
+severity & enum & \texttt{"info"}, \texttt{"warning"}, \texttt{"critical"} \\ \hline
+equipmentId & string/null & Equipamento relacionado (se houver) \\ \hline
+operatorId & string/null & Operador relacionado (se houver) \\ \hline
+contractId & string/null & Contrato relacionado (se houver) \\ \hline
+message & string & Mensagem de alerta \\ \hline
+createdAt & datetime & Data de criação do alerta \\ \hline
+resolvedAt & datetime/null & Data de resolução \\ \hline
+resolvedByUserId & string/null & Usuário que resolveu \\ \hline
+deletedAt, deletedByUserId, isDeleted & vários & Controle de soft delete (se aplicado) \\ \hline
+\end{longtable}
+
+% -------- 4.13 auditLogs --------
+\subsection{auditLogs}
+
+Trilha de auditoria das ações relevantes do sistema.
+
+\begin{longtable}{|p{4cm}|p{3cm}|p{7cm}|}
+\hline
+id & string & ID do log \\ \hline
+organizationId & string & Organização dona \\ \hline
+actorType & enum & \texttt{"user"}, \texttt{"system"} \\ \hline
+actorId & string & ID do usuário ou identificador de sistema \\ \hline
+action & string & Ação realizada (ex.: \texttt{"equipment.checkout"}) \\ \hline
+entityType & string & Tipo de entidade (ex.: \texttt{"equipment"}) \\ \hline
+entityId & string & ID da entidade afetada \\ \hline
+before & object/null & Snapshot antes da ação (parcial ou completo) \\ \hline
+after & object/null & Snapshot após a ação (parcial ou completo) \\ \hline
+ipAddress & string/null & IP de origem (PII) \\ \hline
+createdAt & datetime & Data/hora do registro \\ \hline
+\end{longtable}
+
+\noindent
+\textbf{Observação}: por padrão, \texttt{auditLogs} não sofre updates ou deletes; \texttt{updatedAt}/\texttt{deletedAt} normalmente não são utilizados aqui, salvo políticas específicas.
+
+% -------- 4.14 customFields --------
+\subsection{customFields (opcional)}
+
+Permite extensão de campos em entidades específicas por organização.
+
+\begin{longtable}{|p{4cm}|p{3cm}|p{7cm}|}
+\hline
+id & string & ID do campo customizado \\ \hline
+organizationId & string & Organização dona \\ \hline
+targetCollection & string & Nome da coleção alvo (ex.: \texttt{"equipments"}) \\ \hline
+fieldKey & string & Identificador interno (ex.: \texttt{"centroCusto"}) \\ \hline
+label & string & Rótulo exibido em tela \\ \hline
+type & enum & \texttt{"string"}, \texttt{"number"}, \texttt{"boolean"}, \texttt{"date"} \\ \hline
+required & boolean & Indica se é obrigatório \\ \hline
+createdAt, createdByUserId, updatedAt, updatedByUserId, deletedAt, deletedByUserId, isDeleted & vários & Auditoria e soft delete \\ \hline
+\end{longtable}
+\end{document}

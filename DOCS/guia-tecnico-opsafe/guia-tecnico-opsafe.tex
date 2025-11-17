@@ -1,0 +1,304 @@
+\documentclass[12pt,a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[brazil]{babel}
+\usepackage{geometry}
+\usepackage{setspace}
+\usepackage{titlesec}
+\usepackage{hyperref}
+\usepackage{xcolor}
+
+\geometry{
+  left=2.5cm,
+  right=2.5cm,
+  top=2.5cm,
+  bottom=2.5cm
+}
+
+\onehalfspacing
+
+\titleformat{\section}{\bfseries\large}{\thesection}{1em}{}
+\titleformat{\subsection}{\bfseries\normalsize}{\thesubsection}{1em}{}
+
+\title{\textbf{Guia Técnico do Projeto OpSafe \\ \vspace{0.3cm}
+Diretrizes Técnicas, Arquiteturais, Padrões de Qualidade e Segurança}}
+\author{Caio César Ponte}
+\date{15 de novembro de 2025}
+
+\begin{document}
+
+\maketitle
+\thispagestyle{empty}
+\newpage
+
+% ============================
+\section*{Introdução}
+Este documento técnico define os padrões, tecnologias, métodos de engenharia, regras de qualidade e diretrizes arquiteturais que serão seguidos no projeto \textbf{OpSafe}. Ele serve como guia para desenvolvimento, validação, versionamento, governança, testes, segurança, LGPD e boas práticas para manter a plataforma escalável, segura e consistente.
+
+\newpage
+
+% ============================
+\section{Padrões de Interface}
+
+\subsection{Família de Ícones}
+A plataforma utilizará a biblioteca \textbf{Lucide Icons} como padrão visual principal.  
+Características:
+\begin{itemize}
+  \item Traços lineares, leves e minimalistas.
+  \item Conjunto amplo e padronizado.
+  \item Adaptado a dark/light mode.
+\end{itemize}
+
+\subsection{Família de Cores}
+A identidade visual seguirá um conjunto modular:
+
+\begin{itemize}
+  \item \textbf{Primária}: \#1A73E8 (azul operacional)
+  \item \textbf{Secundária}: \#0A2F5A (azul profundo – seriedade e segurança)
+  \item \textbf{Atenção}: \#F9A825
+  \item \textbf{Sucesso}: \#43A047
+  \item \textbf{Erro}: \#E53935
+  \item \textbf{Cinzas}: escala de \#111111 a \#F5F5F5
+\end{itemize}
+
+\subsection{Família de Fontes}
+\begin{itemize}
+  \item \textbf{Inter} (plataforma Web)
+  \item \textbf{Roboto} (mobile e compatibilidade Android)
+  \item \textbf{SF Pro Text} (compatibilidade iOS)
+\end{itemize}
+
+\subsection{Responsividade e Grid}
+A aplicação segue:
+\begin{itemize}
+  \item \textbf{CSS Grid} + \textbf{Flexbox}
+  \item Breakpoints: 480px, 768px, 1024px, 1440px
+  \item Suporte completo ao Mobile-first
+\end{itemize}
+
+\subsection{Layout}
+\begin{itemize}
+  \item \textbf{Layout Master-Detail} para equipamentos.
+  \item \textbf{Cards modulares} para dashboards.
+  \item \textbf{Side Navigation em modo desktop}.
+  \item \textbf{Bottom Navigation em mobile}.
+\end{itemize}
+
+\newpage
+
+% ============================
+\section{Arquitetura de Software}
+
+\subsection{Clean Architecture – Camadas}
+\begin{itemize}
+  \item \textbf{Domain}: Regras de negócio puras, entidades.
+  \item \textbf{Use Cases}: Operações atômicas da aplicação.
+  \item \textbf{Infrastructure}: Database, API, drivers externos.
+  \item \textbf{Presentation}: Camada de UI (React / Mobile).
+\end{itemize}
+
+\subsection{SOLID}
+Aplicado em todos os módulos:
+\begin{itemize}
+  \item SRP: Um módulo = uma responsabilidade.
+  \item OCP: Código aberto para extensão, fechado para modificação.
+  \item LSP: Módulos substituíveis sem quebrar fluxos.
+  \item ISP: Interfaces pequenas, específicas.
+  \item DIP: Camadas superiores dependem de abstrações, não implementações.
+\end{itemize}
+
+\subsection{Padrões de Código}
+\begin{itemize}
+  \item TypeScript estrito.
+  \item ESLint + Prettier.
+  \item Commits semânticos (feat/fix/docs/refactor/test).
+  \item Versionamento semantic versioning (semver).
+\end{itemize}
+
+\newpage
+
+% ============================
+\section{Banco de Dados}
+
+\subsection{Modelo NoSQL – Padrão}
+O OpSafe utilizará um banco \textbf{MongoDB} ou \textbf{Firestore} com os princípios:
+
+\begin{itemize}
+  \item Coleções independentes.
+  \item Documentos auto-contidos.
+  \item Campos versionados para retrocompatibilidade.
+\end{itemize}
+
+\subsection{Estrutura Base}
+\begin{itemize}
+  \item \texttt{equipments}
+  \item \texttt{operators}
+  \item \texttt{assignments}
+  \item \texttt{maintenance}
+  \item \texttt{contracts}
+  \item \texttt{alerts}
+  \item \texttt{audit\_logs}
+\end{itemize}
+
+\subsection{Blockchain (Opcional e Modular)}
+Aplicável para:
+\begin{itemize}
+  \item garantias de integridade de termos digitais;
+  \item trilhas de auditoria imutáveis;
+\end{itemize}
+Usando:
+\begin{itemize}
+  \item Hash SHA-256;
+  \item Armazenamento fora da cadeia (off-chain) para dados pesados.
+\end{itemize}
+
+\newpage
+
+% ============================
+\section{Segurança da Informação}
+
+\subsection{LGPD – Conformidade}
+\begin{itemize}
+  \item Minimização de dados.
+  \item Consentimento explícito para operadores.
+  \item Relatórios de transparência.
+  \item Controlador e operador bem definidos.
+\end{itemize}
+
+\subsection{Criptografia}
+\begin{itemize}
+  \item AES-256 para dados sensíveis.
+  \item TLS 1.3 para tráfego.
+  \item Hashing Argon2 para senhas.
+\end{itemize}
+
+\subsection{Autenticação e Autorização}
+\begin{itemize}
+  \item OAuth2 + JWT.
+  \item Expiração de tokens + refresh tokens.
+  \item RBAC (Role Based Access Control).
+\end{itemize}
+
+\subsection{DevSecOps}
+\begin{itemize}
+  \item SAST em cada PR.
+  \item Dependabot para pacotes.
+  \item Pipeline com bloqueio de CVEs acima de CVSS 7.
+\end{itemize}
+
+\newpage
+
+% ============================
+\section{Métodos e Fluxos de Cadastro}
+
+\subsection{Cadastro de Equipamento}
+\begin{itemize}
+  \item Identificador único.
+  \item Categoria e contrato associado.
+  \item Ciclo de vida inicial como ``Disponível''.
+\end{itemize}
+
+\subsection{Cadastro de Operador}
+\begin{itemize}
+  \item Dados mínimos (LGPD).
+  \item Função e posto.
+  \item Termo de responsabilidade digital.
+\end{itemize}
+
+\subsection{Cadastro de Manutenção}
+\begin{itemize}
+  \item Preventiva ou corretiva.
+  \item Data programada e realizada.
+  \item Registro de custo.
+\end{itemize}
+
+\newpage
+
+% ============================
+\section{Testes e Qualidade}
+
+\subsection{Testes Unitários}
+\begin{itemize}
+  \item Cobertura mínima: 85\%.
+  \item Testes para cada use case isolado.
+\end{itemize}
+
+\subsection{Testes de Integração}
+\begin{itemize}
+  \item Interação entre camadas.
+  \item Testes com banco real (ambiente isolado).
+\end{itemize}
+
+\subsection{Testes End-to-End}
+\begin{itemize}
+  \item Cypress / Playwright.
+  \item Simular fluxo completo: entrega → termo digital → devolução.
+\end{itemize}
+
+\subsection{Ambiente Controlado}
+\begin{itemize}
+  \item DEV → STAGE → PROD
+  \item STAGE com dados fictícios.
+  \item Proibição de dados reais fora do PROD.
+\end{itemize}
+
+\newpage
+
+% ============================
+\section{CI/CD – Entrega Contínua}
+
+\subsection{Pipeline}
+\begin{itemize}
+  \item Build
+  \item Testes unitários
+  \item SAST
+  \item Deploy automático para STAGE
+  \item Deploy manual e aprovado para PROD
+\end{itemize}
+
+\subsection{Logs e Observabilidade}
+\begin{itemize}
+  \item Logs estruturados (JSON)
+  \item Monitoramento via Prometheus ou Datadog
+  \item Alertas de uptime
+\end{itemize}
+
+\newpage
+
+% ============================
+\section{Regras de Negócio – Padronização}
+
+\subsection{Identificação Única}
+Nenhum recurso pode existir sem ID único global.
+
+\subsection{Termos Digitais}
+Toda entrega e devolução gera registro permanente auditável.
+
+\subsection{EPIs Vencidos}
+Sistema bloqueia automaticamente distribuição.
+
+\subsection{Manutenção Obrigatória}
+Itens com defeito entram em quarentena até liberação.
+
+\newpage
+
+% ============================
+\section{Definição de Pronto (DoD)}
+Um item de trabalho só é considerado concluído quando:
+
+\begin{itemize}
+  \item Código revisado.
+  \item Testes unitários e integração passando.
+  \item Documentação atualizada.
+  \item Sem falhas de lint.
+  \item Sem vulnerabilidades críticas.
+\end{itemize}
+
+\newpage
+
+% ============================
+\section{Conclusão}
+
+Este documento estabelece a base técnica, arquitetural e operacional que sustenta o projeto OpSafe. Ele deve ser utilizado como referência contínua pelo time de desenvolvimento, design, análise, segurança e gestão, garantindo consistência, escalabilidade e aderência à legislação aplicável, especialmente à Lei nº 14.967/2024 e à LGPD.
+
+\end{document}

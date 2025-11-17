@@ -1,0 +1,263 @@
+\documentclass[12pt,a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[brazil]{babel}
+\usepackage{geometry}
+\usepackage{setspace}
+\usepackage{titlesec}
+\usepackage{longtable}
+
+\geometry{margin=2.5cm}
+\setstretch{1.25}
+
+\titleformat{\section}{\Large\bfseries}{\thesection}{1em}{}
+\titleformat{\subsection}{\large\bfseries}{\thesubsection}{1em}{}
+
+\begin{document}
+
+% ======================= CAPA =======================
+\begin{titlepage}
+    \centering
+    {\Huge \textbf{OpSafe -- Projeto Lógico de Banco de Dados (MongoDB)}}\\[1.5cm]
+    {\Large \textbf{Versão 1.0}}\\[0.5cm]
+    {\large Documento Técnico Empresarial}\\[1cm]
+    {\large Autor: Caio César Ponte}\\[0.3cm]
+    {\large \textbf{Data: 15 de novembro de 2025}}\\[4cm]
+
+    \vfill
+    {\small Este documento descreve o projeto lógico do banco de dados MongoDB utilizado pela plataforma OpSafe, incluindo estrutura de databases, coleções, padrões de modelagem, índices e diretrizes de uso.}
+\end{titlepage}
+
+\tableofcontents
+\newpage
+
+% ======================= 1. INTRODUÇÃO =======================
+\section{Introdução}
+
+O OpSafe é uma plataforma SaaS orientada à gestão de equipamentos, operadores e contratos em empresas de segurança privada.  
+O banco de dados principal utiliza MongoDB, no serviço gerenciado MongoDB Atlas.
+
+Este documento registra o projeto lógico do banco, servindo de referência para:
+
+\begin{itemize}
+    \item desenvolvimento backend;
+    \item testes e QA;
+    \item governança de dados;
+    \item evolução de schema e índices.
+\end{itemize}
+
+% ======================= 2. ESTRUTURA GERAL =======================
+\section{Estrutura Geral do Cluster}
+
+\subsection{Cluster e Databases}
+
+O cluster MongoDB é provisionado no MongoDB Atlas.
+
+São definidos, no mínimo, os seguintes databases:
+
+\begin{itemize}
+    \item \textbf{opsafe\_dev} -- ambiente de desenvolvimento;
+    \item \textbf{opsafe\_stage} -- ambiente de homologação (futuro);
+    \item \textbf{opsafe\_prod} -- ambiente de produção (futuro).
+\end{itemize}
+
+Neste documento, o foco é o database \textbf{opsafe\_dev}, que possui todas as coleções de negócio utilizadas pela aplicação.
+
+\subsection{Lista de Coleções}
+
+O database \textbf{opsafe\_dev} contém as seguintes coleções:
+
+\begin{longtable}{|p{6cm}|p{8cm}|}
+\hline
+\textbf{Coleção} & \textbf{Descrição}\\ \hline
+organizations & Organizações (empresas) que utilizam o OpSafe \\ \hline
+users & Usuários internos da plataforma \\ \hline
+operators & Operadores que recebem e utilizam equipamentos \\ \hline
+clients & Clientes atendidos pelas organizações de segurança \\ \hline
+contracts & Contratos firmados com os clientes \\ \hline
+posts & Postos de serviço vinculados a contratos \\ \hline
+equipmentTypes & Tipos de equipamentos (categorias) \\ \hline
+equipments & Equipamentos individuais rastreáveis \\ \hline
+assignments & Registros de movimentação de equipamentos \\ \hline
+terms & Termos digitais de responsabilidade \\ \hline
+maintenanceOrders & Ordens de manutenção \\ \hline
+alerts & Alertas automáticos \\ \hline
+auditLogs & Trilhas de auditoria \\ \hline
+customFields & Campos personalizados por organização \\ \hline
+\end{longtable}
+
+% ======================= 3. PADRÕES DE MODELAGEM =======================
+\section{Padrões de Modelagem}
+
+\subsection{Multi-tenant por organizationId}
+
+Todas as coleções de negócio, com exceção de \texttt{organizations}, utilizam o campo:
+
+\begin{itemize}
+    \item \textbf{organizationId} (string) -- identifica a empresa à qual o documento pertence.
+\end{itemize}
+
+Regras:
+
+\begin{itemize}
+    \item Toda consulta de aplicação deve filtrar por \texttt{organizationId};
+    \item Não há compartilhamento de documentos entre organizações diferentes;
+    \item Índices multi-tenant utilizam \texttt{organizationId} como primeiro campo.
+\end{itemize}
+
+\subsection{Auditoria e Soft Delete}
+
+As coleções de negócio utilizam um padrão comum de auditoria:
+
+\begin{itemize}
+    \item \textbf{createdAt}, \textbf{createdByUserId};
+    \item \textbf{updatedAt}, \textbf{updatedByUserId};
+    \item \textbf{deletedAt}, \textbf{deletedByUserId};
+    \item \textbf{isDeleted} (boolean).
+\end{itemize}
+
+Soft delete:
+
+\begin{itemize}
+    \item Quando \texttt{isDeleted = true}, o registro é considerado inativo;
+    \item Consultas operacionais devem utilizar \texttt{isDeleted = false};
+    \item \texttt{auditLogs} é a única coleção que, por padrão, não utiliza soft delete.
+\end{itemize}
+
+\subsection{Classificação de Dados (LGPD)}
+
+De forma conceitual, os campos são classificados como:
+
+\begin{itemize}
+    \item \textbf{PII}: dados pessoais identificáveis (nome, e-mail, telefone, IP);
+    \item \textbf{Sensíveis}: dados pessoais sensíveis (por exemplo, CPF, quando utilizado);
+    \item \textbf{Business}: dados puramente operacionais.
+\end{itemize}
+
+Esta classificação guia decisões de minimização de dados, retenção e anonimização.
+
+% ======================= 4. ÍNDICES PADRÃO =======================
+\section{Índices Padrão por Coleção}
+
+Esta seção registra os índices considerados mínimos para garantir desempenho adequado das consultas mais comuns.  
+Todos os índices são definidos no database \textbf{opsafe\_dev} e deverão ser replicados em \textbf{opsafe\_prod}.
+
+\subsection{organizations}
+
+\begin{itemize}
+    \item \texttt{\{ status: 1 \}}
+    \item \texttt{\{ name: 1 \}}
+    \item \texttt{\{ isDeleted: 1 \}}
+\end{itemize}
+
+\subsection{users}
+
+\begin{itemize}
+    \item \texttt{\{ organizationId: 1, email: 1 \}} (único);
+    \item \texttt{\{ organizationId: 1, status: 1 \}};
+    \item \texttt{\{ organizationId: 1, isDeleted: 1 \}}.
+\end{itemize}
+
+\subsection{operators}
+
+\begin{itemize}
+    \item \texttt{\{ organizationId: 1, status: 1 \}};
+    \item \texttt{\{ organizationId: 1, identifierCode: 1 \}};
+    \item \texttt{\{ organizationId: 1, isDeleted: 1 \}}.
+\end{itemize}
+
+\subsection{clients}
+
+\begin{itemize}
+    \item \texttt{\{ organizationId: 1, name: 1 \}};
+    \item \texttt{\{ organizationId: 1, isDeleted: 1 \}}.
+\end{itemize}
+
+\subsection{contracts}
+
+\begin{itemize}
+    \item \texttt{\{ organizationId: 1, clientId: 1, status: 1 \}};
+    \item \texttt{\{ organizationId: 1, isDeleted: 1 \}}.
+\end{itemize}
+
+\subsection{posts}
+
+\begin{itemize}
+    \item \texttt{\{ organizationId: 1, clientId: 1, status: 1 \}};
+    \item \texttt{\{ organizationId: 1, isDeleted: 1 \}}.
+\end{itemize}
+
+\subsection{equipmentTypes}
+
+\begin{itemize}
+    \item \texttt{\{ organizationId: 1, category: 1 \}};
+    \item \texttt{\{ organizationId: 1, isDeleted: 1 \}}.
+\end{itemize}
+
+\subsection{equipments}
+
+\begin{itemize}
+    \item \texttt{\{ organizationId: 1, status: 1 \}};
+    \item \texttt{\{ organizationId: 1, equipmentTypeId: 1, status: 1 \}};
+    \item \texttt{\{ organizationId: 1, assetTag: 1 \}} (único);
+    \item \texttt{\{ organizationId: 1, validUntil: 1, status: 1 \}};
+    \item \texttt{\{ organizationId: 1, isDeleted: 1 \}}.
+\end{itemize}
+
+\subsection{assignments}
+
+\begin{itemize}
+    \item \texttt{\{ organizationId: 1, equipmentId: 1, createdAt: -1 \}};
+    \item \texttt{\{ organizationId: 1, operatorId: 1, createdAt: -1 \}};
+    \item \texttt{\{ organizationId: 1, isDeleted: 1 \}}.
+\end{itemize}
+
+\subsection{terms}
+
+\begin{itemize}
+    \item \texttt{\{ organizationId: 1, operatorId: 1, signedAt: -1 \}};
+    \item \texttt{\{ organizationId: 1, createdAt: -1 \}};
+    \item \texttt{\{ organizationId: 1, isDeleted: 1 \}}.
+\end{itemize}
+
+\subsection{maintenanceOrders}
+
+\begin{itemize}
+    \item \texttt{\{ organizationId: 1, equipmentId: 1, status: 1 \}};
+    \item \texttt{\{ organizationId: 1, status: 1, openedAt: -1 \}};
+    \item \texttt{\{ organizationId: 1, isDeleted: 1 \}}.
+\end{itemize}
+
+\subsection{alerts}
+
+\begin{itemize}
+    \item \texttt{\{ organizationId: 1, type: 1, severity: 1, createdAt: -1 \}};
+    \item \texttt{\{ organizationId: 1, isDeleted: 1 \}}.
+\end{itemize}
+
+\subsection{auditLogs}
+
+\begin{itemize}
+    \item \texttt{\{ organizationId: 1, entityType: 1, entityId: 1, createdAt: -1 \}};
+    \item \texttt{\{ organizationId: 1, createdAt: -1 \}}.
+\end{itemize}
+
+\subsection{customFields}
+
+\begin{itemize}
+    \item \texttt{\{ organizationId: 1, targetCollection: 1 \}};
+    \item \texttt{\{ organizationId: 1, targetCollection: 1, fieldKey: 1 \}} (único);
+    \item \texttt{\{ organizationId: 1, isDeleted: 1 \}}.
+\end{itemize}
+
+% ======================= 5. DIRETRIZES DE USO =======================
+\section{Diretrizes de Uso no Backend}
+
+\begin{itemize}
+    \item Toda camada de repositório deve aplicar, por padrão, filtros de \texttt{organizationId} e \texttt{isDeleted = false};
+    \item Operações de exclusão lógica devem preencher \texttt{deletedAt}, \texttt{deletedByUserId} e \texttt{isDeleted = true};
+    \item A coleção \texttt{auditLogs} não deve sofrer updates ou deletes, salvo regras excepcionais de retenção definida em política separada;
+    \item Novos índices devem ser documentados e replicados entre ambientes.
+\end{itemize}
+
+\end{document}

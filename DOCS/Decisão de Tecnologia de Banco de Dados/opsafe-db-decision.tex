@@ -1,0 +1,244 @@
+\documentclass[12pt,a4paper]{article}
+
+% ---- Packages ----
+\usepackage[utf8]{inputenc}
+\usepackage[brazil]{babel}
+\usepackage{geometry}
+\usepackage{setspace}
+\usepackage{titlesec}
+\usepackage{hyperref}
+\usepackage{longtable}
+
+% ---- Page setup ----
+\geometry{margin=2.5cm}
+\setstretch{1.25}
+
+% ---- Title formatting ----
+\titleformat{\section}{\Large\bfseries}{\thesection}{1em}{}
+\titleformat{\subsection}{\large\bfseries}{\thesubsection}{1em}{}
+
+\begin{document}
+
+% ======================= CAPA =======================
+\begin{titlepage}
+    \centering
+    {\Huge \textbf{OpSafe -- Decisão Arquitetural de Banco de Dados}}\\[1.5cm]
+    {\Large \textbf{Versão 1.0}}\\[0.5cm]
+    {\large Documento Técnico Empresarial}\\[1cm]
+    {\large Autor: Caio César Ponte}\\[0.3cm]
+    {\large \textbf{Data: 15 de novembro de 2025}}\\[4cm]
+
+    \vfill
+    {\small Este documento formaliza a decisão técnica sobre a tecnologia de banco de dados a ser utilizada no projeto OpSafe, apresentando o contexto, alternativas avaliadas, análise comparativa, riscos, justificativas e decisão final.}
+\end{titlepage}
+
+\tableofcontents
+\newpage
+
+% ======================= 1. CONTEXTO =======================
+\section{Contexto Geral}
+
+O projeto OpSafe é uma plataforma SaaS para gestão operacional de empresas de segurança privada e patrimonial.  
+Seu escopo envolve:
+
+\begin{itemize}
+    \item Controle de inventário de equipamentos (radios, EPIs, coletes, viaturas);
+    \item Rastreamento de movimentações (checkout, checkin, transferência);
+    \item Emissão e auditoria de termos digitais eletrônicos;
+    \item Gestão de operadores e postos de serviço;
+    \item Histórico completo de manutenção preventiva e corretiva;
+    \item Alertas automáticos e trilhas de auditoria;
+    \item Multi-tenant com isolamento por organização.
+\end{itemize}
+
+O banco de dados precisa atender:
+
+\begin{itemize}
+    \item Alta flexibilidade nos documentos e evolução das regras de negócio;
+    \item Modelo rico de consultas transacionais;
+    \item Capacidade de suportar relatórios operacionais (agregações);
+    \item Multi-tenant baseado em \texttt{organizationId};
+    \item Baixo overhead de manutenção;
+    \item Suporte a auditoria histórica extensa;
+    \item Escalabilidade horizontal simples.
+\end{itemize}
+
+O objetivo deste documento é registrar formalmente a escolha tecnológica do banco de dados primário da plataforma.
+
+% ======================= 2. REQUISITOS =======================
+\section{Requisitos Técnicos e de Negócio}
+
+\subsection{2.1 Requisitos Funcionais do Banco}
+
+\begin{itemize}
+    \item Suporte a documentos complexos com subestruturas;
+    \item Facilidade na criação e evolução de coleções;
+    \item Consultas filtradas por múltiplos campos;
+    \item Agregações para relatórios (sum, group, project);
+    \item Capacidade de trabalhar com auditoria (\texttt{before/after});
+    \item Operações de soft delete com filtros globais;
+    \item Consultas multi-tenant eficientes.
+\end{itemize}
+
+\subsection{2.2 Requisitos Não Funcionais}
+
+\begin{itemize}
+    \item Confiabilidade e redundância;
+    \item Escalabilidade em nuvem;
+    \item Baixo acoplamento ao backend;
+    \item Ferramentas maduras de administração;
+    \item Drivers estáveis em TypeScript;
+    \item Baixo custo operacional inicial.
+\end{itemize}
+
+% ======================= 3. ALTERNATIVAS =======================
+\section{Alternativas Avaliadas}
+
+Foram consideradas as seguintes tecnologias NoSQL viáveis:
+
+\begin{itemize}
+    \item \textbf{MongoDB Atlas}
+    \item \textbf{Google Firestore}
+    \item \textbf{AWS DynamoDB}
+    \item \textbf{PostgreSQL com JSONB (alternativa híbrida)}
+\end{itemize}
+
+% ======================= 4. ANÁLISE COMPARATIVA =======================
+\section{Análise Comparativa}
+
+\subsection{4.1 Critérios Usados}
+
+\begin{itemize}
+    \item Flexibilidade de modelo
+    \item Complexidade de consultas
+    \item Manutenção e custo operacional
+    \item Curva de aprendizado
+    \item Suporte a multi-tenant
+    \item Adequação ao fluxo de auditoria
+    \item Recursos para agregações e relatórios
+\end{itemize}
+
+\subsection{4.2 Tabela Comparativa}
+
+\begin{longtable}{|p{4cm}|p{3cm}|p{3cm}|p{3cm}|}
+\hline
+\textbf{Critério} & \textbf{MongoDB} & \textbf{Firestore} & \textbf{DynamoDB} \\
+\hline
+Modelo de documentos & Excelente & Bom & Bom \\
+\hline
+Consultas complexas & Excelente & Limitado & Limitado \\
+\hline
+Agregações / Relatórios & Forte & Fraco & Ausente \\
+\hline
+Multi-tenant por ID & Simples & Simples & Requer planejamento rígido \\
+\hline
+Auditoria (before/after) & Natural & Difícil & Difícil \\
+\hline
+Curva de aprendizado & Baixa & Baixa & Alta \\
+\hline
+Escalabilidade & Excelente & Muito alta & Muito alta \\
+\hline
+Custo mínimo & Moderado & Baixo & Baixo \\
+\hline
+Flexibilidade para evoluir regras & Excelente & Média & Baixa \\
+\hline
+\end{longtable}
+
+% ======================= 5. DISCUSSÃO =======================
+\section{Discussão}
+
+\subsection{5.1 MongoDB}
+
+Atende de forma superior aos requisitos principais:
+
+\begin{itemize}
+    \item Flexibilidade alta para evolução incremental das coleções;
+    \item Agregations poderosas para relatórios operacionais;
+    \item Suporte natural a objetos aninhados;
+    \item Adaptabilidade a documentos grandes, como termos digitais;
+    \item Modelo fortíssimo para auditoria (pode armazenar snapshots grandes sem impacto conceitual);
+    \item Baixa fricção para multi-tenant;
+    \item Mongoose e driver nativo maduros em Node/TypeScript.
+\end{itemize}
+
+\subsection{5.2 Firestore}
+
+Excelente para aplicações em tempo real, porém possui:
+
+\begin{itemize}
+    \item Limitações severas de query combinada;
+    \item Relatórios complexos exigem reestruturações;
+    \item Nível baixo de suporte para documentos grandes de auditoria.
+\end{itemize}
+
+\subsection{5.3 DynamoDB}
+
+Extremamente escalável, porém:
+
+\begin{itemize}
+    \item Requer modelagem antecipada dos padrões de acesso;
+    \item Não se adequa ao estágio de exploração e evolução contínua do projeto;
+    \item Auditoria complexa devido ao modelo de chave simples.
+\end{itemize}
+
+% ======================= 6. DECISÃO =======================
+\section{Decisão Final}
+
+Após a análise técnica, o banco de dados escolhido para o OpSafe é:
+
+\begin{center}
+    {\Large \textbf{MongoDB Atlas (Nuvem Gerenciada)}}
+\end{center}
+
+\subsection{6.1 Justificativas}
+
+\begin{itemize}
+    \item É a solução que melhor atende ao modelo multi-tenant do projeto;
+    \item Permite evolução rápida das regras de negócio;
+    \item Suporta consultas e agregações avançadas necessárias para relatórios;
+    \item Lida bem com documentos grandes e históricos de auditoria;
+    \item Possui ecossistema maduro para TypeScript;
+    \item Reduz complexidade operacional por ser totalmente gerenciado.
+\end{itemize}
+
+% ======================= 7. RISCOS =======================
+\section{Riscos Identificados}
+
+\begin{itemize}
+    \item \textbf{Custo pode crescer} com volume de dados;
+    \item \textbf{Indexação incorreta} pode afetar performance;
+    \item \textbf{Auditoria extensa} pode gerar coleções muito grandes;
+\end{itemize}
+
+\subsection{Mitigações}
+
+\begin{itemize}
+    \item Monitoramento e revisão trimestral de índices;
+    \item Particionamento lógico por \texttt{organizationId} em consultas intensivas;
+    \item Armazenamento de auditorias frias em buckets externos quando necessário;
+    \item Uso de backups automáticos e política de retenção.
+\end{itemize}
+
+% ======================= 8. RESULTADO E PRÓXIMOS PASSOS =======================
+\section{Resultado}
+
+A decisão técnica está formalizada: **MongoDB Atlas será o banco oficial do OpSafe**.  
+Esta definição orientará:
+
+\begin{itemize}
+    \item O desenvolvimento do backend;
+    \item A criação dos repositórios de domínio;
+    \item A arquitetura de índices;
+    \item Os padrões de auditoria do sistema.
+\end{itemize}
+
+\subsection{Próximos passos}
+
+\begin{enumerate}
+    \item Criar cluster MongoDB Atlas (dev, stage e prod);
+    \item Definir índices iniciais por coleção;
+    \item Implementar o primeiro repositório (organizations);
+    \item Criar estrutura base da API com filtros globais por \texttt{organizationId} e \texttt{isDeleted}.
+\end{enumerate}
+
+\end{document}

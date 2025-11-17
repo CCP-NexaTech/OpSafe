@@ -1,0 +1,24 @@
+\babel@toc {brazil}{}\relax 
+\contentsline {section}{\numberline {1}Objetivo do Documento}{2}{section.1}%
+\contentsline {section}{\numberline {2}Princípios Gerais}{2}{section.2}%
+\contentsline {subsection}{\numberline {2.1}Multi-tenant}{2}{subsection.2.1}%
+\contentsline {subsection}{\numberline {2.2}Modelo NoSQL}{2}{subsection.2.2}%
+\contentsline {subsection}{\numberline {2.3}Convenções de Tipos}{2}{subsection.2.3}%
+\contentsline {subsection}{\numberline {2.4}Padrão de Auditoria e Soft Delete}{3}{subsection.2.4}%
+\contentsline {subsection}{\numberline {2.5}LGPD -- Classificação Conceitual}{3}{subsection.2.5}%
+\contentsline {section}{\numberline {3}Lista de Coleções do Modelo v0.1}{4}{section.3}%
+\contentsline {section}{\numberline {4}Especificações de Coleções}{4}{section.4}%
+\contentsline {subsection}{\numberline {4.1}organizations}{4}{subsection.4.1}%
+\contentsline {subsection}{\numberline {4.2}users}{5}{subsection.4.2}%
+\contentsline {subsection}{\numberline {4.3}operators}{5}{subsection.4.3}%
+\contentsline {subsection}{\numberline {4.4}clients}{6}{subsection.4.4}%
+\contentsline {subsection}{\numberline {4.5}contracts}{6}{subsection.4.5}%
+\contentsline {subsection}{\numberline {4.6}posts}{7}{subsection.4.6}%
+\contentsline {subsection}{\numberline {4.7}equipmentTypes}{8}{subsection.4.7}%
+\contentsline {subsection}{\numberline {4.8}equipments}{8}{subsection.4.8}%
+\contentsline {subsection}{\numberline {4.9}assignments}{9}{subsection.4.9}%
+\contentsline {subsection}{\numberline {4.10}terms}{10}{subsection.4.10}%
+\contentsline {subsection}{\numberline {4.11}maintenanceOrders}{11}{subsection.4.11}%
+\contentsline {subsection}{\numberline {4.12}alerts}{11}{subsection.4.12}%
+\contentsline {subsection}{\numberline {4.13}auditLogs}{12}{subsection.4.13}%
+\contentsline {subsection}{\numberline {4.14}customFields (opcional)}{12}{subsection.4.14}%
