@@ -7,11 +7,13 @@ import {
   Param,
   Patch,
   Post,
+  UseGuards,
 } from '@nestjs/common';
 import { OrganizationsService } from './organizations.service';
 import { CreateOrganizationDto } from './dto/create-organization.dto';
 import { UpdateOrganizationDto } from './dto/update-organization.dto';
 import { OrganizationResponseDto } from './dto/organization-response.dto';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard'
 
 @Controller('organizations')
 export class OrganizationsController {
@@ -19,11 +21,13 @@ export class OrganizationsController {
     private readonly organizationsService: OrganizationsService,
   ) {}
 
+  @UseGuards(JwtAuthGuard)
   @Get()
   async list(): Promise<OrganizationResponseDto[]> {
     return this.organizationsService.findAll();
   }
 
+  @UseGuards(JwtAuthGuard)
   @Get(':id')
   async getById(@Param('id') id: string): Promise<OrganizationResponseDto> {
     const organization = await this.organizationsService.findById(id);
@@ -42,6 +46,7 @@ export class OrganizationsController {
     return this.organizationsService.create(body);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Patch(':id')
   async update(
     @Param('id') id: string,
@@ -56,6 +61,7 @@ export class OrganizationsController {
     return organization;
   }
 
+  @UseGuards(JwtAuthGuard)
   @Delete(':id')
   async delete(@Param('id') id: string): Promise<void> {
     const deleted = await this.organizationsService.softDelete(id);
