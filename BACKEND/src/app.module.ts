@@ -11,6 +11,7 @@ import { AuthModule } from './auth/auth.module';
 import { OperatorsModule } from './operators/operators.module';
 import { ClientsModule } from './clients/clients.module';
 import { ContractsModule } from './contracts/contracts.module';
+import { EquipmentTypesModule } from './equipment-types/equipment-types.module';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { ContractsModule } from './contracts/contracts.module';
     OperatorsModule,
     ClientsModule,
     ContractsModule,
+    EquipmentTypesModule,
   ],
   controllers: [AppController],
   providers: [AppService],
