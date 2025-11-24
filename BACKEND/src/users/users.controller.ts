@@ -1,4 +1,14 @@
-import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Post,
+  UseGuards,
+  Patch,
+  Delete,
+} from '@nestjs/common';
+import { UpdateUserDto } from './dto/update-user.dto';
 import { UsersService } from './users.service';
 import { InviteUserDto } from './dto/invite-user.dto';
 import { AcceptInviteDto } from './dto/accept-invite.dto';
@@ -32,5 +42,34 @@ export class UsersController {
     @Param('organizationId') organizationId: string,
   ): Promise<UserResponseDto[]> {
     return this.usersService.listUsersByOrganization(organizationId);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('organizations/:organizationId/users/:userId')
+  async getUserById(
+    @Param('organizationId') organizationId: string,
+    @Param('userId') userId: string,
+  ): Promise<UserResponseDto> {
+    return this.usersService.getUserById(organizationId, userId);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Patch('organizations/:organizationId/users/:userId')
+  async updateUser(
+    @Param('organizationId') organizationId: string,
+    @Param('userId') userId: string,
+    @Body() updateUserDto: UpdateUserDto,
+  ): Promise<UserResponseDto> {
+    return this.usersService.updateUser(organizationId, userId, updateUserDto);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Delete('organizations/:organizationId/users/:userId')
+  async softDeleteUser(
+    @Param('organizationId') organizationId: string,
+    @Param('userId') userId: string,
+  ): Promise<{ success: boolean }> {
+    await this.usersService.softDeleteUser(organizationId, userId);
+    return { success: true };
   }
 }

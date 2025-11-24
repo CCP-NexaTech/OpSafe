@@ -7,9 +7,9 @@ import { URL } from 'url';
 
 import { AppModule } from '../../src/app.module';
 import { DATABASE_CONNECTION } from '../../src/database/database.module';
-import { JwtAuthGuard } from '../../src/auth/jwt-auth.guard'
+import { JwtAuthGuard } from '../../src/auth/jwt-auth.guard';
 
-describe('Organizations (e2e)', () => {
+describe('Users (e2e)', () => {
   let app: INestApplication;
   let mongod: MongoMemoryServer;
   let db: Db;
@@ -221,5 +221,152 @@ describe('Organizations (e2e)', () => {
       .expect(400);
 
     expect(response.body.message).toContain('expir');
+  });
+
+  it('GET /organizations/:id/users → should list users of organization', async () => {
+    const orgResponse = await request(app.getHttpServer())
+      .post('/organizations')
+      .send({
+        name: 'Org List Users',
+        status: 'active',
+      })
+      .expect(201);
+
+    const organizationId = orgResponse.body.id as string;
+
+    await request(app.getHttpServer())
+      .post(`/organizations/${organizationId}/users/invite`)
+      .send({
+        email: 'list.user@example.com',
+        name: 'User List',
+        role: 'viewer',
+      })
+      .expect(201);
+
+    const listResponse = await request(app.getHttpServer())
+      .get(`/organizations/${organizationId}/users`)
+      .expect(200);
+
+    expect(Array.isArray(listResponse.body)).toBe(true);
+    expect(listResponse.body.length).toBe(1);
+    expect(listResponse.body[0].email).toBe('list.user@example.com');
+    expect(listResponse.body[0].isDeleted).toBe(false);
+  });
+
+  it('GET /organizations/:orgId/users/:userId → should return a specific user', async () => {
+    const orgResponse = await request(app.getHttpServer())
+      .post('/organizations')
+      .send({
+        name: 'Org Get User',
+        status: 'active',
+      })
+      .expect(201);
+
+    const organizationId = orgResponse.body.id as string;
+
+    const inviteResponse = await request(app.getHttpServer())
+      .post(`/organizations/${organizationId}/users/invite`)
+      .send({
+        email: 'get.user@example.com',
+        name: 'User Get',
+        role: 'admin',
+      })
+      .expect(201);
+
+    const userId = inviteResponse.body.id as string;
+
+    const getResponse = await request(app.getHttpServer())
+      .get(`/organizations/${organizationId}/users/${userId}`)
+      .expect(200);
+
+    expect(getResponse.body.id).toBe(userId);
+    expect(getResponse.body.organizationId).toBe(organizationId);
+    expect(getResponse.body.email).toBe('get.user@example.com');
+    expect(getResponse.body.name).toBe('User Get');
+    expect(getResponse.body.isDeleted).toBe(false);
+  });
+
+  it('PATCH /organizations/:orgId/users/:userId → should update user data', async () => {
+    const orgResponse = await request(app.getHttpServer())
+      .post('/organizations')
+      .send({
+        name: 'Org Patch User',
+        status: 'active',
+      })
+      .expect(201);
+
+    const organizationId = orgResponse.body.id as string;
+
+    const inviteResponse = await request(app.getHttpServer())
+      .post(`/organizations/${organizationId}/users/invite`)
+      .send({
+        email: 'patch.user@example.com',
+        name: 'User Patch',
+        role: 'viewer',
+      })
+      .expect(201);
+
+    const userId = inviteResponse.body.id as string;
+
+    const patchResponse = await request(app.getHttpServer())
+      .patch(`/organizations/${organizationId}/users/${userId}`)
+      .send({
+        name: 'User Patch Updated',
+        role: 'admin',
+      })
+      .expect(200);
+
+    expect(patchResponse.body.id).toBe(userId);
+    expect(patchResponse.body.name).toBe('User Patch Updated');
+    expect(patchResponse.body.role).toBe('admin');
+    expect(patchResponse.body.isDeleted).toBe(false);
+  });
+
+  it('DELETE /organizations/:orgId/users/:userId → should soft delete user and remove from list', async () => {
+    const orgResponse = await request(app.getHttpServer())
+      .post('/organizations')
+      .send({
+        name: 'Org Delete User',
+        status: 'active',
+      })
+      .expect(201);
+
+    const organizationId = orgResponse.body.id as string;
+
+    const inviteResponse = await request(app.getHttpServer())
+      .post(`/organizations/${organizationId}/users/invite`)
+      .send({
+        email: 'delete.user@example.com',
+        name: 'User Delete',
+        role: 'viewer',
+      })
+      .expect(201);
+
+    const userId = inviteResponse.body.id as string;
+
+    const listBefore = await request(app.getHttpServer())
+      .get(`/organizations/${organizationId}/users`)
+      .expect(200);
+
+    const foundBefore = listBefore.body.find(
+      (user: any) => user.id === userId,
+    );
+    expect(foundBefore).toBeTruthy();
+    expect(foundBefore.isDeleted).toBe(false);
+
+    await request(app.getHttpServer())
+      .delete(`/organizations/${organizationId}/users/${userId}`)
+      .expect(200);
+
+    const listAfter = await request(app.getHttpServer())
+      .get(`/organizations/${organizationId}/users`)
+      .expect(200);
+
+    const foundAfter = listAfter.body.find((user: any) => user.id === userId);
+    expect(foundAfter).toBeUndefined();
+
+    await request(app.getHttpServer())
+      .get(`/organizations/${organizationId}/users/${userId}`)
+      .expect(404);
   });
 });

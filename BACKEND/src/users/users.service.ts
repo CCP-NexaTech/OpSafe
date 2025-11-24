@@ -18,6 +18,7 @@ import type { UserResponseDto } from './dto/user-response.dto';
 import { USER_INVITATION_QUEUE } from '../notifications/notification.tokens';
 import type { InvitationEmailJob } from '../types/notifications/invitationEmailJob';
 import type { InviteUserResponseDto } from './dto/invite-user-response.dto';
+import type { UpdateUserDto } from './dto/update-user.dto';
 
 @Injectable()
 export class UsersService {
@@ -55,6 +56,34 @@ export class UsersService {
 
   private generateInvitationToken(): string {
     return Buffer.from(crypto.randomUUID()).toString('base64url');
+  }
+
+  private async findUserDocumentOrThrow(
+    organizationId: string,
+    userId: string,
+  ): Promise<User> {
+    if (!ObjectId.isValid(organizationId)) {
+      throw new BadRequestException('Invalid organization id');
+    }
+
+    if (!ObjectId.isValid(userId)) {
+      throw new BadRequestException('Invalid user id');
+    }
+
+    const organizationObjectId = new ObjectId(organizationId);
+    const userObjectId = new ObjectId(userId);
+
+    const userDocument = await this.usersCollection.findOne({
+      _id: userObjectId,
+      organizationId: organizationObjectId,
+      isDeleted: false,
+    });
+
+    if (!userDocument) {
+      throw new NotFoundException('User not found');
+    }
+
+    return userDocument;
   }
 
   async inviteUser(
@@ -206,5 +235,75 @@ export class UsersService {
       .toArray();
 
     return users.map((userDocument) => this.mapToResponse(userDocument));
+  }
+
+  async getUserById(
+    organizationId: string,
+    userId: string,
+  ): Promise<UserResponseDto> {
+    const userDocument = await this.findUserDocumentOrThrow(
+      organizationId,
+      userId,
+    );
+
+    return this.mapToResponse(userDocument);
+  }
+
+  async updateUser(
+    organizationId: string,
+    userId: string,
+    updateUserDto: UpdateUserDto,
+  ): Promise<UserResponseDto> {
+    const existingUser = await this.findUserDocumentOrThrow(
+      organizationId,
+      userId,
+    );
+
+    const now = new Date();
+
+    const result = await this.usersCollection.findOneAndUpdate(
+      {
+        _id: existingUser._id,
+        organizationId: existingUser.organizationId,
+        isDeleted: false,
+      },
+      {
+        $set: {
+          ...updateUserDto,
+          updatedAt: now,
+        },
+      },
+      { returnDocument: 'after' },
+    );
+
+    if (!result) {
+      throw new NotFoundException('User not found');
+    }
+
+    return this.mapToResponse(result);
+  }
+
+  async softDeleteUser(organizationId: string, userId: string): Promise<void> {
+    const existingUser = await this.findUserDocumentOrThrow(
+      organizationId,
+      userId,
+    );
+
+    const now = new Date();
+
+    await this.usersCollection.updateOne(
+      {
+        _id: existingUser._id,
+        organizationId: existingUser.organizationId,
+        isDeleted: false,
+      },
+      {
+        $set: {
+          isDeleted: true,
+          deletedAt: now,
+          updatedAt: now,
+        },
+      },
+    );
   }
 }
