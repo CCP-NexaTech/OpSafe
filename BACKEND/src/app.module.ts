@@ -12,6 +12,7 @@ import { OperatorsModule } from './operators/operators.module';
 import { ClientsModule } from './clients/clients.module';
 import { ContractsModule } from './contracts/contracts.module';
 import { EquipmentTypesModule } from './equipment-types/equipment-types.module';
+import { PostsModule } from './posts/posts.module';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { EquipmentTypesModule } from './equipment-types/equipment-types.module';
     ClientsModule,
     ContractsModule,
     EquipmentTypesModule,
+    PostsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
