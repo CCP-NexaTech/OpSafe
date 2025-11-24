@@ -62,7 +62,7 @@ export class AuthService {
 
     const payload = {
       sub: user._id.toHexString(),
-      organizationId: (user.organizationId as ObjectId).toHexString(),
+      organizationId: user.organizationId.toHexString(),
       role: user.role,
     };
 

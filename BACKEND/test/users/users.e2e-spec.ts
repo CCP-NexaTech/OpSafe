@@ -7,6 +7,7 @@ import { URL } from 'url';
 
 import { AppModule } from '../../src/app.module';
 import { DATABASE_CONNECTION } from '../../src/database/database.module';
+import { JwtAuthGuard } from '../../src/auth/jwt-auth.guard'
 
 describe('Organizations (e2e)', () => {
   let app: INestApplication;
@@ -22,6 +23,10 @@ describe('Organizations (e2e)', () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
     })
+      .overrideGuard(JwtAuthGuard)
+      .useValue({
+        canActivate: () => true,
+      })
       .overrideProvider(DATABASE_CONNECTION)
       .useValue(db)
       .compile();
@@ -96,9 +101,7 @@ describe('Organizations (e2e)', () => {
       .delete(`/organizations/${id}`)
       .expect(200);
 
-    await request(app.getHttpServer())
-      .get(`/organizations/${id}`)
-      .expect(404);
+    await request(app.getHttpServer()).get(`/organizations/${id}`).expect(404);
   });
 
   it('POST /organizations/:id/users/invite → should invite a user and return acceptInviteUrl', async () => {

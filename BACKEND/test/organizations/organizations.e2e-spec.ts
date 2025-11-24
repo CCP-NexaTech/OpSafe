@@ -6,6 +6,7 @@ import { MongoClient, Db } from 'mongodb';
 
 import { AppModule } from '../../src/app.module';
 import { DATABASE_CONNECTION } from '../../src/database/database.module';
+import { JwtAuthGuard } from '../../src/auth/jwt-auth.guard'
 
 describe('Organizations (e2e)', () => {
   let app: INestApplication;
@@ -21,6 +22,10 @@ describe('Organizations (e2e)', () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
     })
+      .overrideGuard(JwtAuthGuard)
+            .useValue({
+              canActivate: () => true,
+            })
       .overrideProvider(DATABASE_CONNECTION)
       .useValue(db) 
       .compile();

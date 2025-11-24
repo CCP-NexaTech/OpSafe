@@ -4,7 +4,7 @@ import { InviteUserDto } from './dto/invite-user.dto';
 import { AcceptInviteDto } from './dto/accept-invite.dto';
 import type { UserResponseDto } from './dto/user-response.dto';
 import type { InviteUserResponseDto } from './dto/invite-user-response.dto';
-import { JwtAuthGuard } from 'src/auth/jwt-auth.guard'
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
 @Controller()
 export class UsersController {
