@@ -13,6 +13,7 @@ import { ClientsModule } from './clients/clients.module';
 import { ContractsModule } from './contracts/contracts.module';
 import { EquipmentTypesModule } from './equipment-types/equipment-types.module';
 import { PostsModule } from './posts/posts.module';
+import { EquipmentsModule } from './equipments/equipments.module';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { PostsModule } from './posts/posts.module';
     ContractsModule,
     EquipmentTypesModule,
     PostsModule,
+    EquipmentsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
