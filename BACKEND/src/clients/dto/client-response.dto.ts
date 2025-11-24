@@ -1,8 +1,6 @@
-import { ObjectId } from 'mongodb';
-import { BaseDocument } from './common';
-
-export interface Client extends BaseDocument {
-  organizationId: ObjectId;
+export interface ClientResponseDto {
+  id: string;
+  organizationId: string;
   name: string;
   document: string;
 
@@ -17,4 +15,8 @@ export interface Client extends BaseDocument {
   addressCity?: string;
   addressState?: string;
   addressZipCode?: string;
+
+  createdAt: Date;
+  updatedAt: Date;
+  isDeleted: boolean;
 }
