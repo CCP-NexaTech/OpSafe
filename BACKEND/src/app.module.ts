@@ -10,6 +10,7 @@ import { NotificationsModule } from './notifications/notifications.module'
 import { AuthModule } from './auth/auth.module';
 import { OperatorsModule } from './operators/operators.module';
 import { ClientsModule } from './clients/clients.module';
+import { ContractsModule } from './contracts/contracts.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { ClientsModule } from './clients/clients.module';
     AuthModule,
     OperatorsModule,
     ClientsModule,
+    ContractsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
