@@ -14,6 +14,8 @@ import { ContractsModule } from './contracts/contracts.module';
 import { EquipmentTypesModule } from './equipment-types/equipment-types.module';
 import { PostsModule } from './posts/posts.module';
 import { EquipmentsModule } from './equipments/equipments.module';
+import { AssignmentsModule } from './assignments/assignments.module';
+import { TermsModule } from './terms/terms.module';
 
 @Module({
   imports: [
@@ -32,6 +34,8 @@ import { EquipmentsModule } from './equipments/equipments.module';
     EquipmentTypesModule,
     PostsModule,
     EquipmentsModule,
+    AssignmentsModule,
+    TermsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
