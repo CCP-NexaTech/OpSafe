@@ -17,6 +17,7 @@ import { EquipmentsModule } from './equipments/equipments.module';
 import { AssignmentsModule } from './assignments/assignments.module';
 import { TermsModule } from './terms/terms.module';
 import { MaintenanceOrdersModule } from './maintenance-orders/maintenance-orders.module';
+import { AlertsModule } from './alerts/alerts.module';
 
 @Module({
   imports: [
@@ -38,6 +39,7 @@ import { MaintenanceOrdersModule } from './maintenance-orders/maintenance-orders
     AssignmentsModule,
     TermsModule,
     MaintenanceOrdersModule,
+    AlertsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

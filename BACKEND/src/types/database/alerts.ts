@@ -1,12 +1,22 @@
-import { ObjectId } from 'mongodb'
+import { ObjectId } from 'mongodb';
 import { BaseDocument } from './common';
 
-export type AlertSeverity = 'low' | 'medium' | 'high';
+export type AlertType =
+  | 'epiExpiry'
+  | 'lateReturn'
+  | 'maintenanceDue'
+  | 'stockLow';
+
+export type AlertSeverity = 'info' | 'warning' | 'critical';
 
 export interface Alert extends BaseDocument {
   organizationId: ObjectId;
-  type: string;
+  type: AlertType;
   severity: AlertSeverity;
+  equipmentId?: ObjectId | null;
+  operatorId?: ObjectId | null;
+  contractId?: ObjectId | null;
   message: string;
-  createdAt: Date;
+  resolvedAt?: Date | null;
+  resolvedByUserId?: ObjectId | null;
 }
