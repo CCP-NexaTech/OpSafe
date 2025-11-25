@@ -1,0 +1,89 @@
+
+\documentclass[12pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{geometry}
+\geometry{margin=2.5cm}
+\usepackage{titlesec}
+\usepackage{hyperref}
+\hypersetup{colorlinks=true, linkcolor=blue, urlcolor=blue}
+
+\title{OpSafe Domain Overview}
+\author{}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\section{Visão Geral do Sistema}
+O \textbf{OpSafe} é um sistema de gestão operacional para empresas de segurança privada, permitindo controle sobre operadores, clientes, postos de serviço, contratos, equipamentos, manutenção, alertas, auditoria e campos personalizados, tudo com arquitetura multi-organização.
+
+\section{Estrutura de Domínio}
+O domínio é dividido em três camadas principais:
+
+\begin{itemize}
+    \item \textbf{Configuração} -- entidades administrativas que estruturam o ambiente.
+    \item \textbf{Operação} -- fluxo diário operacional.
+    \item \textbf{Serviços Transversais} -- autenticação, auditoria e extensões.
+\end{itemize}
+
+\section{Camada de Configuração}
+
+\subsection{Organizations}
+Raiz do sistema, cada organização possui isolamento completo e define o espaço de dados.
+
+\subsection{Users}
+Usuários administrativos com papéis (admin, manager, viewer). Controlam autenticação e acesso ao sistema.
+
+\subsection{Clients}
+Clientes que recebem os serviços de segurança. Incluem dados como nome, documento, contato e endereço.
+
+\subsection{Contracts}
+Contratos firmados com os clientes. Relacionam-se a postos, SLA e vigência.
+
+\subsection{Posts}
+Postos de serviço onde operadores e equipamentos são alocados.
+
+\subsection{EquipmentTypes}
+Categorias e tipos de equipamentos, como EPIs, rádios, coletes etc.
+
+\subsection{Equipments}
+Equipamentos individualizados com status, numeração e características.
+
+\subsection{Operators}
+Colaboradores operacionais, com código identificador, documento, contato e turnos.
+
+\subsection{CustomFields}
+Campos personalizados criados pela organização para ampliar o modelo.
+
+\section{Camada Operacional}
+
+\subsection{Assignments}
+Entrega e devolução de equipamentos. Controla ciclo operacional e vinculação a operadores e postos.
+
+\subsection{Terms}
+Termos digitais de responsabilidade assinados pelos operadores.
+
+\subsection{MaintenanceOrders}
+Ordens de manutenção que alteram o status do equipamento.
+
+\subsection{Alerts}
+Alertas operacionais e incidentes envolvendo operadores, equipamentos ou procedimentos.
+
+\section{Camada Transversal}
+
+\subsection{Auth}
+Controle de autenticação via JWT, permissões e fluxo de convite.
+
+\subsection{AuditLogs}
+Registro de ações relevantes para rastreabilidade e compliance.
+
+\section{Pilares do Domínio}
+\begin{itemize}
+    \item Multi-organização
+    \item Controle operacional completo
+    \item Compliance robusto
+    \item Extensibilidade via campos customizados
+\end{itemize}
+
+\end{document}
