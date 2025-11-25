@@ -1,13 +1,21 @@
-import { ObjectId } from 'mongodb'
+import { ObjectId } from 'mongodb';
 import { BaseDocument } from './common';
 
-export type MaintenanceStatus = 'open' | 'in_progress' | 'closed';
+export type MaintenanceOrderType = 'preventive' | 'corrective';
+
+export type MaintenanceOrderStatus =
+  | 'open'
+  | 'inprogress'
+  | 'closed'
+  | 'cancelled';
 
 export interface MaintenanceOrder extends BaseDocument {
   organizationId: ObjectId;
   equipmentId: ObjectId;
-  description: string;
+  type: MaintenanceOrderType;
+  status: MaintenanceOrderStatus;
   openedAt: Date;
-  closedAt?: Date;
-  status: MaintenanceStatus;
+  closedAt: Date | null;
+  description?: string | null;
+  nextDueAt?: Date | null;
 }

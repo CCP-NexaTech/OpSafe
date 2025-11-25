@@ -16,6 +16,7 @@ import { PostsModule } from './posts/posts.module';
 import { EquipmentsModule } from './equipments/equipments.module';
 import { AssignmentsModule } from './assignments/assignments.module';
 import { TermsModule } from './terms/terms.module';
+import { MaintenanceOrdersModule } from './maintenance-orders/maintenance-orders.module';
 
 @Module({
   imports: [
@@ -36,6 +37,7 @@ import { TermsModule } from './terms/terms.module';
     EquipmentsModule,
     AssignmentsModule,
     TermsModule,
+    MaintenanceOrdersModule,
   ],
   controllers: [AppController],
   providers: [AppService],
