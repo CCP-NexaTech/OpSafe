@@ -1,11 +1,20 @@
-import { ObjectId } from 'mongodb'
+import { ObjectId } from 'mongodb';
 import { BaseDocument } from './common';
+
+export type CustomFieldDataType =
+  | 'string'
+  | 'number'
+  | 'boolean'
+  | 'date'
+  | 'select';
 
 export interface CustomField extends BaseDocument {
   organizationId: ObjectId;
-  targetCollection: string; // ex: equipments, clients, operators
+  targetCollection: string;
   fieldKey: string;
   label: string;
-  type: 'text' | 'number' | 'date' | 'boolean' | 'select';
+  dataType: CustomFieldDataType;
+  required: boolean;
   options?: string[];
+  helpText?: string | null;
 }

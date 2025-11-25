@@ -18,6 +18,7 @@ import { AssignmentsModule } from './assignments/assignments.module';
 import { TermsModule } from './terms/terms.module';
 import { MaintenanceOrdersModule } from './maintenance-orders/maintenance-orders.module';
 import { AlertsModule } from './alerts/alerts.module';
+import { AuditLogsModule } from './audit-logs/audit-logs.module';
 
 @Module({
   imports: [
@@ -40,6 +41,7 @@ import { AlertsModule } from './alerts/alerts.module';
     TermsModule,
     MaintenanceOrdersModule,
     AlertsModule,
+    AuditLogsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
