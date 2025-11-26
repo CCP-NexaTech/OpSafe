@@ -1,0 +1,26 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "Node",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "resolveJsonModule": true,
+    "allowSyntheticDefaultImports": true,
+    "forceConsistentCasingInFileNames": true,
+    "baseUrl": ".",
+    "paths": {
+      "@opsafe/types": ["packages/opsafe-types/src"],
+      "@opsafe/types/*": ["packages/types/src/*"],
+      "@opsafe/theme": ["packages/opsafe-theme/src"],
+      "@opsafe/theme/*": ["packages/opsafe-theme/src/*"],
+      "@opsafe/ui": ["packages/opsafe-ui/src"],
+      "@opsafe/ui/*": ["packages/opsafe-ui/src/*"],
+      "@opsafe/api": ["packages/opsafe-api/src"],
+      "@opsafe/api/*": ["packages/opsafe-api/src/*"],
+      "@opsafe/sdk": ["packages/opsafe-sdk/src"],
+      "@opsafe/sdk/*": ["packages/opsafe-sdk/src/*"]
+    }
+  }
+}

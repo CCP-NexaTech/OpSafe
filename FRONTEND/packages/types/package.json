@@ -1,0 +1,16 @@
+{
+  "name": "@opsafe/types",
+  "version": "0.0.1",
+  "private": false,
+  "main": "dist/index.cjs",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "sideEffects": false,
+  "scripts": {
+    "build": "tsup src/index.ts --dts --format cjs,esm --clean",
+    "lint": "echo \"(types) nothing to lint yet\"",
+    "test": "echo \"(types) no tests yet\""
+  },
+  "dependencies": {},
+  "devDependencies": {}
+}

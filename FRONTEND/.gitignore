@@ -1,0 +1,100 @@
+# ---------------------------------------------------
+# Core
+# ---------------------------------------------------
+node_modules/
+dist/
+build/
+.tmp/
+.temp/
+.cache/
+.pnp.*
+pnpm-lock.yaml
+
+# Turbo / Nx / Tsup / Vite
+/.turbo
+/.nx
+.esbuild/
+tsconfig.tsbuildinfo
+
+# ---------------------------------------------------
+# Logs
+# ---------------------------------------------------
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+turbo.log
+*.log
+
+# ---------------------------------------------------
+# Editors / IDEs
+# ---------------------------------------------------
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+!.vscode/launch.json
+
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# ---------------------------------------------------
+# OS files
+# ---------------------------------------------------
+.DS_Store
+Thumbs.db
+
+# ---------------------------------------------------
+# Tests
+# ---------------------------------------------------
+coverage/
+**/coverage/
+*.lcov
+.jest/
+
+# ---------------------------------------------------
+# TypeScript
+# ---------------------------------------------------
+*.tsbuildinfo
+*.d.ts.map
+
+# ---------------------------------------------------
+# Build outputs for web frameworks
+# ---------------------------------------------------
+# Next.js
+.next/
+out/
+
+# Angular
+.angular/
+.angular/cache/
+*.ngsummary.json
+
+# React (CRA / Vite)
+build/
+vite.config.temp/
+
+# ---------------------------------------------------
+# Env files
+# ---------------------------------------------------
+.env
+.env.*.local
+.env.local
+.env.test
+.env.production
+.env.development
+
+# ---------------------------------------------------
+# Misc
+# ---------------------------------------------------
+**/*.log
+*.cache
+*.tgz
+*.zip
+
+# Ignore lockfiles from other package managers
+yarn.lock
+package-lock.json
