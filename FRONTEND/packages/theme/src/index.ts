@@ -4,4 +4,4 @@ export * from "./tokens/radius";
 export * from "./tokens/spacing";
 
 // Tailwind preset
-export * from "./tailwind-preset";
+export * from "./tailwind/preset";

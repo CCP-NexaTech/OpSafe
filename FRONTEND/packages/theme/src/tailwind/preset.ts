@@ -1,5 +1,5 @@
-import { opsafeLightColors } from "./tokens/colors";
-import { opsafeRadius } from "./tokens/radius";
+import { opsafeLightColors } from "../tokens/colors";
+import { opsafeRadius } from "../tokens/radius";
 
 /**
  * Preset Tailwind do OpSafe.
