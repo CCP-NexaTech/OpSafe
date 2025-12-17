@@ -15,6 +15,10 @@ export { organizationEquipmentTypesContract } from "./organizations/equipment-ty
 export { organizationEquipmentsContract } from "./organizations/equipments/equipments.contract";
 export { organizationAssignmentsContract } from "./organizations/assignments/assignments.contract";
 
+export { organizationTermsContract } from "./organizations/terms/terms.contract";
+export { organizationPostsContract } from "./organizations/posts/posts.contract";
+export { organizationCustomFieldsContract } from "./organizations/custom-fields/custom-fields.contract";
+
 export type { LoginInput, LoginResponse, AuthMeResponse } from "./auth/auth.types";
 
 export type {
@@ -71,3 +75,25 @@ export type {
   UpdateAssignmentInput,
   AssignmentStatus,
 } from "./organizations/assignments/assignments.types";
+
+export type {
+  Term,
+  CreateTermInput,
+  UpdateTermInput,
+  TermStatus,
+} from "./organizations/terms/terms.types";
+
+export type {
+  Post,
+  CreatePostInput,
+  UpdatePostInput,
+  PostStatus,
+} from "./organizations/posts/posts.types";
+
+export type {
+  CustomField,
+  CreateCustomFieldInput,
+  UpdateCustomFieldInput,
+  CustomFieldStatus,
+  CustomFieldDataType,
+} from "./organizations/custom-fields/custom-fields.types";

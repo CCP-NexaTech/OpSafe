@@ -104,6 +104,45 @@ export const apiRoutes = {
       softDelete: (organizationId: string, assignmentId: string) =>
         `/organizations/${organizationId}/assignments/${assignmentId}`,
     },
+
+    terms: {
+      list: (organizationId: string) =>
+        `/organizations/${organizationId}/terms`,
+      create: (organizationId: string) =>
+        `/organizations/${organizationId}/terms`,
+      getById: (organizationId: string, termId: string) =>
+        `/organizations/${organizationId}/terms/${termId}`,
+      update: (organizationId: string, termId: string) =>
+        `/organizations/${organizationId}/terms/${termId}`,
+      softDelete: (organizationId: string, termId: string) =>
+        `/organizations/${organizationId}/terms/${termId}`,
+    },
+
+    posts: {
+      list: (organizationId: string) =>
+        `/organizations/${organizationId}/posts`,
+      create: (organizationId: string) =>
+        `/organizations/${organizationId}/posts`,
+      getById: (organizationId: string, postId: string) =>
+        `/organizations/${organizationId}/posts/${postId}`,
+      update: (organizationId: string, postId: string) =>
+        `/organizations/${organizationId}/posts/${postId}`,
+      softDelete: (organizationId: string, postId: string) =>
+        `/organizations/${organizationId}/posts/${postId}`,
+    },
+
+    customFields: {
+      list: (organizationId: string) =>
+        `/organizations/${organizationId}/custom-fields`,
+      create: (organizationId: string) =>
+        `/organizations/${organizationId}/custom-fields`,
+      getById: (organizationId: string, customFieldId: string) =>
+        `/organizations/${organizationId}/custom-fields/${customFieldId}`,
+      update: (organizationId: string, customFieldId: string) =>
+        `/organizations/${organizationId}/custom-fields/${customFieldId}`,
+      softDelete: (organizationId: string, customFieldId: string) =>
+        `/organizations/${organizationId}/custom-fields/${customFieldId}`,
+    },
   },
 
   users: {
