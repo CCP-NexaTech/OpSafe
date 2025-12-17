@@ -11,6 +11,10 @@ export { organizationOperatorsContract } from "./organizations/operators/operato
 export { organizationClientsContract } from "./organizations/clients/clients.contract";
 export { organizationContractsContract } from "./organizations/contracts/contracts.contract";
 
+export { organizationEquipmentTypesContract } from "./organizations/equipment-types/equipment-types.contract";
+export { organizationEquipmentsContract } from "./organizations/equipments/equipments.contract";
+export { organizationAssignmentsContract } from "./organizations/assignments/assignments.contract";
+
 export type { LoginInput, LoginResponse, AuthMeResponse } from "./auth/auth.types";
 
 export type {
@@ -46,3 +50,24 @@ export type {
   UpdateContractInput,
   ContractStatus,
 } from "./organizations/contracts/contracts.types";
+
+export type {
+  EquipmentType,
+  CreateEquipmentTypeInput,
+  UpdateEquipmentTypeInput,
+  EquipmentTypeStatus,
+} from "./organizations/equipment-types/equipment-types.types";
+
+export type {
+  Equipment,
+  CreateEquipmentInput,
+  UpdateEquipmentInput,
+  EquipmentStatus,
+} from "./organizations/equipments/equipments.types";
+
+export type {
+  Assignment,
+  CreateAssignmentInput,
+  UpdateAssignmentInput,
+  AssignmentStatus,
+} from "./organizations/assignments/assignments.types";
