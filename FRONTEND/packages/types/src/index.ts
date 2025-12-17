@@ -8,3 +8,8 @@ export * from "./contracts";
 export * from "./custom-fields";
 export * from "./terms";
 export * from "./posts";
+export * from "./equipment-types";
+export * from "./equipments";
+export * from "./maintenance-orders";
+export * from "./alerts";
+export * from "./audit-logs";
