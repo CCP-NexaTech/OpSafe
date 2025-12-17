@@ -6,10 +6,10 @@ export * from './common/base-entity';
 export * from './auth/roles';
 
 // Organizations
-export * from './organizations/status';
+export * from './organizations/organization-status';
 
 // Operators
-export * from './operators/status';
+export * from './operators/operator-status';
 
 // Alerts
 export * from './alerts/alert-types';
