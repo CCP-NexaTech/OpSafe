@@ -19,6 +19,10 @@ export { organizationTermsContract } from "./organizations/terms/terms.contract"
 export { organizationPostsContract } from "./organizations/posts/posts.contract";
 export { organizationCustomFieldsContract } from "./organizations/custom-fields/custom-fields.contract";
 
+export { organizationMaintenanceOrdersContract } from "./organizations/maintenance-orders/maintenance-orders.contract";
+export { organizationAlertsContract } from "./organizations/alerts/alerts.contract";
+export { organizationAuditLogsContract } from "./organizations/audit-logs/audit-logs.contract";
+
 export type { LoginInput, LoginResponse, AuthMeResponse } from "./auth/auth.types";
 
 export type {
@@ -97,3 +101,26 @@ export type {
   CustomFieldStatus,
   CustomFieldDataType,
 } from "./organizations/custom-fields/custom-fields.types";
+
+export type {
+  MaintenanceOrder,
+  CreateMaintenanceOrderInput,
+  UpdateMaintenanceOrderInput,
+  MaintenanceOrderPriority,
+  MaintenanceOrderStatus,
+} from "./organizations/maintenance-orders/maintenance-orders.types";
+
+export type {
+  Alert,
+  CreateAlertInput,
+  UpdateAlertInput,
+} from "./organizations/alerts/alerts.types";
+
+export type {
+  AuditLog,
+  CreateAuditLogInput,
+  UpdateAuditLogInput,
+  AuditLogEntity,
+  AuditLogAction,
+} from "./organizations/audit-logs/audit-logs.types";
+

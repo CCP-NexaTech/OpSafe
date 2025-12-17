@@ -1,48 +1,129 @@
-export type HttpMethod = "GET" | "POST" | "PATCH" | "DELETE"
-
-export type RequestOptions = {
-  baseUrl: string
-  token?: string
-  signal?: AbortSignal
-}
+export type HttpMethod = "GET" | "POST" | "PATCH" | "PUT" | "DELETE";
 
 export type ApiError = {
-  status: number
-  message: string
-  details?: unknown
+  statusCode: number;
+  message: string;
+  details?: unknown;
+};
+
+export type ApiResult<TResponse> =
+  | { ok: true; data: TResponse; statusCode: number }
+  | { ok: false; error: ApiError; statusCode: number };
+
+export type RequestJsonParams<TBody> = {
+  baseUrl: string;
+  path: string;
+  method: HttpMethod;
+
+  token?: string;
+  headers?: Record<string, string>;
+  body?: TBody;
+
+  signal?: AbortSignal;
+};
+
+function buildUrl(baseUrl: string, path: string): string {
+  const normalizedBaseUrl = baseUrl.endsWith("/") ? baseUrl.slice(0, -1) : baseUrl;
+  const normalizedPath = path.startsWith("/") ? path : `/${path}`;
+  return `${normalizedBaseUrl}${normalizedPath}`;
 }
 
-export type ApiResult<T> =
-  | { ok: true; data: T }
-  | { ok: false; error: ApiError }
+async function readResponseBodySafely(response: Response): Promise<unknown> {
+  const contentType = response.headers.get("content-type") ?? "";
+  const isJson = contentType.includes("application/json");
 
-export async function requestJson<TResponse>(
-  method: HttpMethod,
-  path: string,
-  options: RequestOptions,
-  body?: unknown,
+  if (response.status === 204) {
+    return null;
+  }
+
+  try {
+    return isJson ? await response.json() : await response.text();
+  } catch {
+    return null;
+  }
+}
+
+function normalizeError(response: Response, responseBody: unknown): ApiError {
+  if (responseBody && typeof responseBody === "object") {
+    const possibleMessage = (responseBody as { message?: unknown }).message;
+
+    if (typeof possibleMessage === "string") {
+      return {
+        statusCode: response.status,
+        message: possibleMessage,
+        details: responseBody,
+      };
+    }
+
+    if (Array.isArray(possibleMessage)) {
+      return {
+        statusCode: response.status,
+        message: possibleMessage.join(", "),
+        details: responseBody,
+      };
+    }
+  }
+
+  return {
+    statusCode: response.status,
+    message: response.statusText || "Request failed",
+    details: responseBody,
+  };
+}
+
+export async function requestJson<TResponse, TBody = undefined>(
+  params: RequestJsonParams<TBody>,
 ): Promise<ApiResult<TResponse>> {
-  const response = await fetch(`${options.baseUrl}${path}`, {
-    method,
-    headers: {
-      "Content-Type": "application/json",
-      ...(options.token ? { Authorization: `Bearer ${options.token}` } : {}),
-    },
-    body: body ? JSON.stringify(body) : undefined,
-    signal: options.signal,
-  })
+  const url = buildUrl(params.baseUrl, params.path);
+
+  const headers: Record<string, string> = {
+    Accept: "application/json",
+    ...(params.headers ?? {}),
+  };
+
+  if (params.token) {
+    headers.Authorization = `Bearer ${params.token}`;
+  }
+
+  const hasBody = params.body !== undefined;
+  if (hasBody) {
+    headers["Content-Type"] = "application/json";
+  }
+
+  let response: Response;
+
+  try {
+    response = await fetch(url, {
+      method: params.method,
+      headers,
+      body: hasBody ? JSON.stringify(params.body) : undefined,
+      signal: params.signal,
+    });
+  } catch (error) {
+    return {
+      ok: false,
+      statusCode: 0,
+      error: {
+        statusCode: 0,
+        message: "Network error",
+        details: error,
+      },
+    };
+  }
+
+  const responseBody = await readResponseBodySafely(response);
 
   if (!response.ok) {
     return {
       ok: false,
-      error: {
-        status: response.status,
-        message: await response.text().catch(() => "Request failed"),
-      },
-    }
+      statusCode: response.status,
+      error: normalizeError(response, responseBody),
+    };
   }
 
-  const hasJson = response.headers.get("content-type")?.includes("application/json")
-  const data = (hasJson ? await response.json() : undefined) as TResponse
-  return { ok: true, data }
+  return {
+    ok: true,
+    statusCode: response.status,
+    data: responseBody as TResponse,
+  };
 }

@@ -143,6 +143,45 @@ export const apiRoutes = {
       softDelete: (organizationId: string, customFieldId: string) =>
         `/organizations/${organizationId}/custom-fields/${customFieldId}`,
     },
+
+    maintenanceOrders: {
+      list: (organizationId: string) =>
+        `/organizations/${organizationId}/maintenance-orders`,
+      create: (organizationId: string) =>
+        `/organizations/${organizationId}/maintenance-orders`,
+      getById: (organizationId: string, maintenanceOrderId: string) =>
+        `/organizations/${organizationId}/maintenance-orders/${maintenanceOrderId}`,
+      update: (organizationId: string, maintenanceOrderId: string) =>
+        `/organizations/${organizationId}/maintenance-orders/${maintenanceOrderId}`,
+      softDelete: (organizationId: string, maintenanceOrderId: string) =>
+        `/organizations/${organizationId}/maintenance-orders/${maintenanceOrderId}`,
+    },
+
+    alerts: {
+      list: (organizationId: string) =>
+        `/organizations/${organizationId}/alerts`,
+      create: (organizationId: string) =>
+        `/organizations/${organizationId}/alerts`,
+      getById: (organizationId: string, alertId: string) =>
+        `/organizations/${organizationId}/alerts/${alertId}`,
+      update: (organizationId: string, alertId: string) =>
+        `/organizations/${organizationId}/alerts/${alertId}`,
+      softDelete: (organizationId: string, alertId: string) =>
+        `/organizations/${organizationId}/alerts/${alertId}`,
+    },
+
+    auditLogs: {
+      list: (organizationId: string) =>
+        `/organizations/${organizationId}/audit-logs`,
+      create: (organizationId: string) =>
+        `/organizations/${organizationId}/audit-logs`,
+      getById: (organizationId: string, auditLogId: string) =>
+        `/organizations/${organizationId}/audit-logs/${auditLogId}`,
+      update: (organizationId: string, auditLogId: string) =>
+        `/organizations/${organizationId}/audit-logs/${auditLogId}`,
+      softDelete: (organizationId: string, auditLogId: string) =>
+        `/organizations/${organizationId}/audit-logs/${auditLogId}`,
+    },
   },
 
   users: {
