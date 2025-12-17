@@ -4,3 +4,7 @@ export * from "./users";
 export * from "./operators";
 export * from "./clients";
 export * from "./assignments";
+export * from "./contracts";
+export * from "./custom-fields";
+export * from "./terms";
+export * from "./posts";
