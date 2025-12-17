@@ -1,5 +1,7 @@
-/** String em formato ObjectId (MongoDB) */
-export type ObjectIdString = string;
+export type EntityId = string;
 
-/** Data em ISO 8601 (ex: 2025-11-25T21:30:00.000Z) */
+/**
+ * ISO 8601 date-time string.
+ * Ex: 2025-12-17T14:22:10.123Z
+ */
 export type IsoDateString = string;
