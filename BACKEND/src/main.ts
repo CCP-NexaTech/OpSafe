@@ -1,9 +1,14 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
+import { requestIdMiddleware } from './shared/middlewares/request-id.middleware'
+import { GlobalExceptionFilter } from './shared/filters/global-exception.filter'
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  app.use(requestIdMiddleware);
+  app.useGlobalFilters(new GlobalExceptionFilter());
+
 
   const config = new DocumentBuilder()
     .setTitle('OpSafe API')
