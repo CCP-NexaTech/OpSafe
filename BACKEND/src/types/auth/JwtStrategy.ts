@@ -8,3 +8,9 @@ export interface JwtPayload {
   iat?: number;
   exp?: number;
 }
+
+export interface JwtUserClaims {
+  userId: string;
+  organizationId: string;
+  role: UserRole;
+}

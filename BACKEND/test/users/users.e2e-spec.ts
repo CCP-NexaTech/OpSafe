@@ -116,7 +116,7 @@ describe('Users (e2e)', () => {
     const organizationId = orgResponse.body.id as string;
 
     const inviteResponse = await request(app.getHttpServer())
-      .post(`/organizations/${organizationId}/users/invite`)
+      .post(`/organizations/${organizationId}/users`)
       .send({
         email: 'invite@example.com',
         name: 'Convite Teste',
@@ -146,7 +146,7 @@ describe('Users (e2e)', () => {
     const organizationId = orgResponse.body.id as string;
 
     const inviteResponse = await request(app.getHttpServer())
-      .post(`/organizations/${organizationId}/users/invite`)
+      .post(`/organizations/${organizationId}/users`)
       .send({
         email: 'user.accept@example.com',
         name: 'User Accept',
@@ -163,13 +163,13 @@ describe('Users (e2e)', () => {
     expect(token).toBeTruthy();
 
     const acceptResponse = await request(app.getHttpServer())
-      .post('/users/accept-invite')
+      .post(`/organizations/${organizationId}/users/accept-invite`)
       .send({
         token,
         password: 'SenhaForte123!',
         name: 'User Accept Final',
       })
-      .expect(201);
+      .expect(200);
 
     expect(acceptResponse.body.email).toBe('user.accept@example.com');
     expect(acceptResponse.body.name).toBe('User Accept Final');
@@ -188,7 +188,7 @@ describe('Users (e2e)', () => {
     const organizationId = orgResponse.body.id as string;
 
     const inviteResponse = await request(app.getHttpServer())
-      .post(`/organizations/${organizationId}/users/invite`)
+      .post(`/organizations/${organizationId}/users`)
       .send({
         email: 'user.expired@example.com',
         name: 'User Expired',
@@ -212,7 +212,7 @@ describe('Users (e2e)', () => {
     );
 
     const response = await request(app.getHttpServer())
-      .post('/users/accept-invite')
+      .post(`/organizations/${organizationId}/users/accept-invite`)
       .send({
         token,
         password: 'Senha123!',
@@ -235,7 +235,7 @@ describe('Users (e2e)', () => {
     const organizationId = orgResponse.body.id as string;
 
     await request(app.getHttpServer())
-      .post(`/organizations/${organizationId}/users/invite`)
+      .post(`/organizations/${organizationId}/users`)
       .send({
         email: 'list.user@example.com',
         name: 'User List',
@@ -265,7 +265,7 @@ describe('Users (e2e)', () => {
     const organizationId = orgResponse.body.id as string;
 
     const inviteResponse = await request(app.getHttpServer())
-      .post(`/organizations/${organizationId}/users/invite`)
+      .post(`/organizations/${organizationId}/users`)
       .send({
         email: 'get.user@example.com',
         name: 'User Get',
@@ -298,7 +298,7 @@ describe('Users (e2e)', () => {
     const organizationId = orgResponse.body.id as string;
 
     const inviteResponse = await request(app.getHttpServer())
-      .post(`/organizations/${organizationId}/users/invite`)
+      .post(`/organizations/${organizationId}/users`)
       .send({
         email: 'patch.user@example.com',
         name: 'User Patch',
@@ -334,7 +334,7 @@ describe('Users (e2e)', () => {
     const organizationId = orgResponse.body.id as string;
 
     const inviteResponse = await request(app.getHttpServer())
-      .post(`/organizations/${organizationId}/users/invite`)
+      .post(`/organizations/${organizationId}/users`)
       .send({
         email: 'delete.user@example.com',
         name: 'User Delete',

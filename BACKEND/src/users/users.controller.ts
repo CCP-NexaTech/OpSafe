@@ -3,6 +3,7 @@ import {
   Controller,
   Delete,
   Get,
+  HttpCode,
   Param,
   Patch,
   Post,
@@ -124,6 +125,7 @@ export class UsersController {
     description: 'Unexpected error.',
     type: ErrorResponseDto,
   })
+  @HttpCode(200)
   @Post('/accept-invite')
   async acceptInvite(
     @Body() body: AcceptInviteDto,

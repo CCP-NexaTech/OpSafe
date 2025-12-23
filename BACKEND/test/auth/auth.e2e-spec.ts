@@ -14,6 +14,9 @@ describe('Auth + Invite flow (e2e)', () => {
   let mongod: MongoMemoryServer;
   let db: Db;
 
+  const mockUserId = new ObjectId();
+  const mockOrganizationId = new ObjectId();
+
   beforeAll(async () => {
     mongod = await MongoMemoryServer.create();
     const uri = mongod.getUri();
@@ -25,7 +28,17 @@ describe('Auth + Invite flow (e2e)', () => {
     })
       .overrideGuard(JwtAuthGuard)
       .useValue({
-        canActivate: () => true,
+        canActivate: (context: ExecutionContext) => {
+          const req = context.switchToHttp().getRequest();
+
+          req.user = {
+            userId: mockUserId.toHexString(),
+            organizationId: mockOrganizationId.toHexString(),
+            role: 'admin',
+          };
+
+          return true;
+        },
       })
       .overrideProvider(DATABASE_CONNECTION)
       .useValue(db)
@@ -43,7 +56,6 @@ describe('Auth + Invite flow (e2e)', () => {
   });
 
   beforeEach(async () => {
-    // Limpa todas as coleções entre os testes
     const collections = await db.collections();
     for (const collection of collections) {
       await collection.deleteMany({});
@@ -53,58 +65,44 @@ describe('Auth + Invite flow (e2e)', () => {
   it('should complete full flow: invite → accept invite → login', async () => {
     const httpServer = app.getHttpServer();
 
-    // 1) Criar organização
     const orgResponse = await request(httpServer)
       .post('/organizations')
-      .send({
-        name: 'Org Auth Flow',
-        document: '00.000.000/0001-55',
-        status: 'active',
-      })
+      .send({ name: 'Org Auth Flow', status: 'active' })
       .expect(201);
 
     const organizationId = orgResponse.body.id as string;
-    const email = 'user.authflow@test.com';
 
-    // 2) Gerar convite
     const inviteResponse = await request(httpServer)
-      .post(`/organizations/${organizationId}/users/invite`)
+      .post(`/organizations/${organizationId}/users`)
       .send({
-        email,
+        email: 'user.authflow@test.com',
         name: 'User Auth Flow',
         role: 'admin',
       })
       .expect(201);
 
-    const acceptInviteUrl = inviteResponse.body.acceptInviteUrl;
-    expect(acceptInviteUrl).toBeDefined();
+    const acceptInviteUrl = inviteResponse.body.acceptInviteUrl as string;
 
     const url = new URL(acceptInviteUrl);
     const invitationToken = url.searchParams.get('token');
-
     expect(invitationToken).toBeTruthy();
 
-    // 3) Aceitar convite (define senha)
     await request(httpServer)
-      .post('/users/accept-invite')
+      .post(`/organizations/${organizationId}/users/accept-invite`)
       .send({
         token: invitationToken,
         name: 'User Auth Flow',
         password: 'SenhaForte123!',
       })
-      .expect(201);
+      .expect(200);
 
-    // 4) Login
     const loginResponse = await request(httpServer)
       .post('/auth/login')
-      .send({
-        email,
-        password: 'SenhaForte123!',
-      })
+      .send({ email: 'user.authflow@test.com', password: 'SenhaForte123!' })
       .expect(201);
 
-    expect(loginResponse.body).toHaveProperty('accessToken');
-    expect(loginResponse.body).toHaveProperty('user');
+    const accessToken = loginResponse.body.accessToken as string;
+    expect(accessToken).toBeTruthy();
   });
 
   it('should reject accept-invite when invitation is expired', async () => {
@@ -123,7 +121,7 @@ describe('Auth + Invite flow (e2e)', () => {
 
     // 2) Insere usuário com convite expirado direto no banco
     const now = new Date();
-    const expiredDate = new Date(now.getTime() - 60 * 60 * 1000); // 1h atrás
+    const expiredDate = new Date(now.getTime() - 60 * 60 * 1000);
 
     const expiredToken = 'expired-token-123';
 
@@ -136,24 +134,84 @@ describe('Auth + Invite flow (e2e)', () => {
       name: 'Expired User',
       role: 'admin',
       status: 'pending',
-      passwordHash: undefined as any,
+      passwordHash: null as any,
       invitationToken: expiredToken,
       invitationExpiresAt: expiredDate,
       createdAt: now,
       updatedAt: now,
       isDeleted: false,
+      deletedAt: null as any,
     });
 
     // 3) Tentar aceitar convite expirado
     const acceptResponse = await request(httpServer)
-      .post('/users/accept-invite')
+      .post(`/organizations/${organizationId}/users/accept-invite`)
       .send({
         token: expiredToken,
         name: 'Expired User',
         password: 'SenhaQualquer123!',
       })
-      .expect(400); // assumindo BadRequestException
+      .expect(400);
 
     expect(acceptResponse.body.message).toContain('Invitation expired');
+  });
+
+  it('GET /auth/me → should return current user profile from database', async () => {
+    const httpServer = app.getHttpServer();
+    const usersCollection = db.collection<User>('users');
+
+    const now = new Date();
+
+    await usersCollection.insertOne({
+      _id: mockUserId,
+      organizationId: mockOrganizationId,
+      email: 'me.user@test.com',
+      name: 'Me User',
+      role: 'admin',
+      status: 'active',
+      passwordHash: null as any,
+      invitationToken: null as any,
+      invitationExpiresAt: null as any,
+      createdAt: now,
+      updatedAt: now,
+      isDeleted: false,
+      deletedAt: null as any,
+    });
+
+    const response = await request(httpServer).get('/auth/me').expect(200);
+
+    expect(response.body).toEqual({
+      id: mockUserId.toHexString(),
+      organizationId: mockOrganizationId.toHexString(),
+      email: 'me.user@test.com',
+      name: 'Me User',
+      role: 'admin',
+      status: 'active',
+    });
+  });
+
+  it('GET /auth/me → should reject when user isDeleted=true', async () => {
+    const httpServer = app.getHttpServer();
+    const usersCollection = db.collection<User>('users');
+
+    const now = new Date();
+
+    await usersCollection.insertOne({
+      _id: mockUserId,
+      organizationId: mockOrganizationId,
+      email: 'deleted.user@test.com',
+      name: 'Deleted User',
+      role: 'admin',
+      status: 'active',
+      passwordHash: null as any,
+      invitationToken: null as any,
+      invitationExpiresAt: null as any,
+      createdAt: now,
+      updatedAt: now,
+      isDeleted: true,
+      deletedAt: now as any,
+    });
+
+    await request(httpServer).get('/auth/me').expect(401);
   });
 });

@@ -7,6 +7,8 @@ import { DATABASE_CONNECTION } from '../database/database.module';
 import type { User } from '../types/database/users';
 import type { LoginDto } from './dto/login.dto';
 import type { LoginResponseDto } from './dto/login-response.dto';
+import type { MeResponseDto } from './dto/me-response.dto';
+import { JwtUserClaims } from 'src/types/auth/JwtStrategy';
 
 @Injectable()
 export class AuthService {
@@ -20,6 +22,44 @@ export class AuthService {
 
   private get usersCollection() {
     return this.database.collection<User>(this.usersCollectionName);
+  }
+
+  async me(userClaims: JwtUserClaims | undefined): Promise<MeResponseDto> {
+    if (!userClaims) {
+      throw new UnauthorizedException('Token não fornecido');
+    }
+
+    if (!ObjectId.isValid(userClaims.userId)) {
+      throw new UnauthorizedException('Token inválido');
+    }
+
+    const userId = new ObjectId(userClaims.userId);
+
+    const user = await this.usersCollection.findOne({
+      _id: userId,
+      isDeleted: false,
+    });
+
+    if (!user) {
+      throw new UnauthorizedException('Usuário não encontrado');
+    }
+
+    if (user.isDeleted) {
+      throw new UnauthorizedException('Usuário está deletado');
+    }
+
+    if (user.status !== 'active') {
+      throw new UnauthorizedException('Usuário não está ativo');
+    }
+
+    return {
+      id: user._id.toHexString(),
+      organizationId: (user.organizationId as ObjectId).toHexString(),
+      email: user.email,
+      name: user.name,
+      role: user.role,
+      status: user.status,
+    };
   }
 
   private async validateUserByEmailAndPassword(
