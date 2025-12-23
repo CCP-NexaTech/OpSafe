@@ -7,7 +7,7 @@ export interface Post extends BaseDocument {
   organizationId: ObjectId;
   clientId: ObjectId;
   name: string;
-  location?: string | null;
+  location?: string;
   contractId?: ObjectId | null;
   status: PostStatus;
 }
